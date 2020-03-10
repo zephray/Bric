@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:pcb-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -198,17 +197,6 @@ F 3 "~" H 5300 3550 50  0001 C CNN
 	1    5300 3550
 	-1   0    0    -1  
 $EndComp
-$Comp
-L symbols:LPC5500 U100
-U 1 1 5D749DD3
-P 4100 4300
-F 0 "U100" H 4100 4765 50  0000 C CNN
-F 1 "LPC5500" H 4100 4674 50  0000 C CNN
-F 2 "Package_QFP:TQFP-100-1EP_14x14mm_P0.5mm_EP5x5mm_ThermalVias" H 4100 4700 50  0001 C CNN
-F 3 "" H 4000 4350 50  0001 C CNN
-	1    4100 4300
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	5600 4200 5800 4200
 Wire Wire Line
@@ -345,4 +333,15 @@ $EndComp
 Wire Wire Line
 	4700 4200 5300 4200
 Connection ~ 5300 4200
+$Comp
+L symbols:LPC5500_FBD64 U100
+U 1 1 5EB08D81
+P 4100 4300
+F 0 "U100" H 4100 4765 50  0000 C CNN
+F 1 "LPC5500_FBD64" H 4100 4674 50  0000 C CNN
+F 2 "Package_QFP:LQFP-64-1EP_10x10mm_P0.5mm_EP5x5mm_ThermalVias" H 4100 4700 50  0001 C CNN
+F 3 "" H 4000 4350 50  0001 C CNN
+	1    4100 4300
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC

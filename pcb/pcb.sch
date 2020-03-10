@@ -1,5 +1,4 @@
 EESchema Schematic File Version 4
-LIBS:pcb-cache
 EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
@@ -41,7 +40,7 @@ $EndSheet
 Text Notes 1700 2150 0    100  ~ 0
 MCU
 Text Notes 1700 3350 0    100  ~ 0
-STN LCD
+EINK
 Text Notes 1700 2550 0    100  ~ 0
 TF-Card
 Text Notes 1700 1400 0    118  Italic 24
