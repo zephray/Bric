@@ -15,8 +15,6 @@ Comment4 ""
 $EndDescr
 Text Label 4800 2900 0    50   ~ 0
 MPU_JTAG_TCK
-Text Label 4800 2800 0    50   ~ 0
-MPU_JTAG_TDO
 Text Label 4800 3000 0    50   ~ 0
 MPU_JTAG_TMS
 $Comp
@@ -112,18 +110,18 @@ Wire Wire Line
 	7800 6100 7600 6100
 Text Notes 8200 5500 0    100  ~ 0
 ARM JTAG
-Text GLabel 4200 4400 2    50   Input ~ 0
+Text GLabel 6700 2100 2    50   Input ~ 0
 PB_STAT
 Wire Wire Line
-	4200 4400 4000 4400
-Text GLabel 6700 2100 2    50   Output ~ 0
+	6700 2100 6500 2100
+Text GLabel 4200 4400 2    50   Output ~ 0
 USB_SUSPEND
 Wire Wire Line
-	6700 2100 6500 2100
-Text GLabel 4200 3300 2    50   Output ~ 0
+	4200 4400 4000 4400
+Text GLabel 4200 4500 2    50   Output ~ 0
 PMIC_ON_REQ
 Wire Wire Line
-	4200 3300 4000 3300
+	4200 4500 4000 4500
 NoConn ~ 7100 6100
 Text GLabel 4200 4100 2    50   Input ~ 0
 SAI1_MCLK
@@ -200,8 +198,6 @@ I2C1_SDA
 Text GLabel 5100 3200 2    50   Output ~ 0
 I2C1_SCL
 Wire Wire Line
-	4000 2800 5400 2800
-Wire Wire Line
 	4000 2900 5400 2900
 Wire Wire Line
 	4000 3000 5400 3000
@@ -224,29 +220,21 @@ Wire Wire Line
 Wire Wire Line
 	4000 4100 4200 4100
 Wire Wire Line
-	4200 3400 4000 3400
-Text GLabel 4200 3400 2    50   Output ~ 0
-~LCD_PWR_EN
+	4000 2300 4200 2300
 Wire Wire Line
-	4000 4600 4200 4600
-Wire Wire Line
-	4000 4700 4200 4700
-Wire Wire Line
-	4000 4500 4200 4500
+	4000 4000 4200 4000
 Wire Wire Line
 	4000 4800 4200 4800
-Text GLabel 4200 4800 2    50   Input ~ 0
-SW_DN
-Text GLabel 4200 4700 2    50   Input ~ 0
-SW_UP
-Text GLabel 4200 4600 2    50   Input ~ 0
-SW_LE
-Text GLabel 4200 4500 2    50   Input ~ 0
-SW_RI
-Text GLabel 4200 2300 2    50   Input ~ 0
-HOLD
 Wire Wire Line
-	4000 2300 4200 2300
+	4000 4700 4200 4700
+Text GLabel 4200 4700 2    50   Input ~ 0
+SW_DN
+Text GLabel 4200 4000 2    50   Input ~ 0
+SW_UP
+Text GLabel 4200 2300 2    50   Input ~ 0
+SW_LE
+Text GLabel 4200 4800 2    50   Input ~ 0
+SW_RI
 Text GLabel 8300 6100 2    50   Output ~ 0
 POR
 Wire Wire Line
@@ -259,7 +247,7 @@ AR Path="/5D4C99F9/5D7B1EE5" Ref="D?"  Part="1"
 AR Path="/5D180A01/5D7B1EE5" Ref="D101"  Part="1" 
 F 0 "D101" H 5200 6050 50  0000 C CNN
 F 1 "LED" H 5350 6050 50  0000 C CNN
-F 2 "LED_THT:LED_D5.0mm" H 5250 5950 50  0001 C CNN
+F 2 "LED_SMD:LED_0603_1608Metric" H 5250 5950 50  0001 C CNN
 F 3 "~" H 5250 5950 50  0001 C CNN
 	1    5250 5950
 	-1   0    0    1   
@@ -294,10 +282,10 @@ Wire Wire Line
 	5700 5950 5800 5950
 Wire Wire Line
 	5800 5950 5800 6050
-Text Label 4200 1800 0    50   ~ 0
+Text Label 4200 2800 0    50   ~ 0
 LED
 Wire Wire Line
-	4000 1800 4350 1800
+	4000 2800 4350 2800
 Text Label 4900 5950 0    50   ~ 0
 LED
 Wire Wire Line
@@ -322,6 +310,8 @@ $Comp
 L symbols:LPC5500_FBD64 U100
 U 3 1 5E9E4AC8
 P 3700 2000
+AR Path="/5E9E4AC8" Ref="U100"  Part="3" 
+AR Path="/5D180A01/5E9E4AC8" Ref="U100"  Part="3" 
 F 0 "U100" H 3642 2465 50  0000 C CNN
 F 1 "LPC5500_FBD64" H 3642 2374 50  0000 C CNN
 F 2 "Package_QFP:LQFP-64-1EP_10x10mm_P0.5mm_EP5x5mm_ThermalVias" H 3700 2400 50  0001 C CNN
@@ -333,6 +323,8 @@ $Comp
 L symbols:LPC5500_FBD64 U100
 U 4 1 5E9EF415
 P 6200 2000
+AR Path="/5E9EF415" Ref="U100"  Part="4" 
+AR Path="/5D180A01/5E9EF415" Ref="U100"  Part="4" 
 F 0 "U100" H 6142 2465 50  0000 C CNN
 F 1 "LPC5500_FBD64" H 6142 2374 50  0000 C CNN
 F 2 "Package_QFP:LQFP-64-1EP_10x10mm_P0.5mm_EP5x5mm_ThermalVias" H 6200 2400 50  0001 C CNN
@@ -341,7 +333,7 @@ F 3 "" H 6100 2050 50  0001 C CNN
 	-1   0    0    -1  
 $EndComp
 Text Notes 5450 3000 0    50   ~ 0
-SWO\nSWCLK\nSWDIO
+SWCLK\nSWDIO
 Text GLabel 4200 2000 2    50   Input ~ 0
 EPD_BUSY
 Text GLabel 4200 2100 2    50   Output ~ 0
@@ -368,8 +360,4 @@ Wire Wire Line
 	4000 1900 4200 1900
 NoConn ~ 6500 1900
 NoConn ~ 7600 6000
-Text GLabel 4200 4000 2    50   Input ~ 0
-SW_CE
-Wire Wire Line
-	4200 4000 4000 4000
 $EndSCHEMATC
