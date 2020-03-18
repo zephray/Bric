@@ -25,6 +25,8 @@ impact*
 Debug/
 Release/
 
+*.zip
+
 *.map
 *.obj
 *.rom
@@ -144,3 +146,4 @@ Temporary Items
 *.wsdt
 *.dbgdt
 *.dnx
+/.metadata/
