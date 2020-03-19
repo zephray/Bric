@@ -53,6 +53,11 @@ int main(void) {
 
     printf("Hello World\n");
 
+    // Gas Gauge
+    printf("Testing LTC2942 Gas Gauge...\n");
+    // LTC2942 address 1100100
+
+
     /* Force the counter to be placed into memory. */
     volatile static int i = 0 ;
     /* Enter an infinite loop, just incrementing a counter. */
