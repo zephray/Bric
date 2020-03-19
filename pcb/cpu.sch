@@ -228,13 +228,13 @@ Wire Wire Line
 Wire Wire Line
 	4000 4700 4200 4700
 Text GLabel 4200 4700 2    50   Input ~ 0
-SW_DN
+SW_MIN
 Text GLabel 4200 4000 2    50   Input ~ 0
-SW_UP
+SW_SEL
 Text GLabel 4200 2300 2    50   Input ~ 0
-SW_LE
+SW_PLUS
 Text GLabel 4200 4800 2    50   Input ~ 0
-SW_RI
+SW_BACK
 Text GLabel 8300 6100 2    50   Output ~ 0
 POR
 Wire Wire Line

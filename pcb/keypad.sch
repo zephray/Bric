@@ -14,13 +14,13 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 Text GLabel 5800 3500 0    50   Output ~ 0
-SW_RI
+SW_BACK
 Text GLabel 4200 3500 0    50   Output ~ 0
-SW_LE
+SW_PLUS
 Text GLabel 5000 3000 0    50   Output ~ 0
-SW_UP
+SW_SEL
 Text GLabel 5000 4000 0    50   Output ~ 0
-SW_DN
+SW_MIN
 $Comp
 L power:GND #PWR0288
 U 1 1 5D28BC76

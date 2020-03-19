@@ -455,7 +455,7 @@
     (tags capacitor)
     (path /5D4C99F9/5EBEB32F)
     (attr smd)
-    (fp_text reference C13 (at 0 -1.43) (layer F.SilkS)
+    (fp_text reference C13 (at -0.12 0.04) (layer F.SilkS) hide
       (effects (font (size 1 1) (thickness 0.15)))
     )
     (fp_text value 10uF (at 0 1.43) (layer F.Fab)
