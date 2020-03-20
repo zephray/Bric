@@ -38,6 +38,11 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 #include "LPC5528.h"
+#include "fsl_gpio.h"
+#include "systick.h"
+#include "i2c.h"
+#include "epd.h"
+#include "cs43130.h"
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -51,21 +56,55 @@ int main(void) {
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
 
-    printf("Hello World\n");
+    printf("Project Bric Bringup\n");
 
-    // Gas Gauge
+    printf("Initializing SysTick...\n");
+    SysTick_Init();
+
+    /* Gas Gauge */
     printf("Testing LTC2942 Gas Gauge...\n");
-    // LTC2942 address 1100100
+    /* LTC2942 address 1100100 */
+#define LTC2942_ADDR 0x64
+#define LTC2942_STATUS 0x00
+#define LTC2942_CTRL 0x01
+#define LTC2942_VOLT_MSB 0x08
+#define LTC2942_VOLT_LSB 0x09
+#define LTC2942_TEMP_MSB 0x0c
+#define LTC2942_TEMP_LSB 0x0d
+    uint8_t regval;
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_STATUS, &regval);
+    printf("STATUS = %02x\n", regval);
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_CTRL, &regval);
+    printf("CONTROL = %02x\n", regval);
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_VOLT_MSB, &regval);
+    printf("VOLTAGE MSB = %02x\n", regval);
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_VOLT_LSB, &regval);
+    printf("VOLTAGE LSB = %02x\n", regval);
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_MSB, &regval);
+    printf("TEMPERATURE MSB = %02x\n", regval);
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_LSB, &regval);
+    printf("TEMPERATURE LSB = %02x\n", regval);
 
+    /* SPI Flash */
+    /* Not part of the prototype yet */
 
-    /* Force the counter to be placed into memory. */
-    volatile static int i = 0 ;
-    /* Enter an infinite loop, just incrementing a counter. */
+    /* Eink */
+    EPD_Init();
+    EPD_Clear();
+
+    /* Codec */
+    CS43130_Init();
+
+    /* SD Card */
+    if (SDC_CheckCardInsert() == 0) {
+    	SDC_Init();
+    }
+
+    /* USB Audio */
+
     while(1) {
-        i++ ;
-        /* 'Dummy' NOP to allow source level single stepping of
-            tight while() loop */
-        __asm volatile ("nop");
+    	GPIO_PortToggle(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
+    	SysTick_DelayTicks(1000U);
     }
     return 0 ;
 }

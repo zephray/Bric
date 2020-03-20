@@ -41,7 +41,18 @@
 /**
  * @brief	The board name 
  */
-#define BOARD_NAME "board"
+#define BOARD_NAME "Bric"
+
+#define BOARD_SDIF_BASEADDR SDIF
+#define BOARD_SDIF_CLKSRC kCLOCK_SDio
+#define BOARD_SDIF_CLK_FREQ CLOCK_GetSdioClkFreq()
+#define BOARD_SDIF_CLK_ATTACH kMAIN_CLK_to_SDIO_CLK
+#define BOARD_SDIF_IRQ SDIO_IRQn
+#define BOARD_MMC_VCC_SUPPLY kMMC_VoltageWindows270to360
+#define BOARD_SD_CARD_DETECT_PIN 17
+#define BOARD_SD_CARD_DETECT_PORT 0
+#define BOARD_SD_CARD_DETECT_GPIO GPIO
+#define BOARD_SD_DETECT_TYPE kSDMMCHOST_DetectCardByHostCD
 
 #if defined(__cplusplus)
 extern "C" {

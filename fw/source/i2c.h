@@ -10,6 +10,8 @@
 #define _I2C_H_
 
 int I2C_WriteReg(uint8_t addr, uint8_t reg, uint8_t val);
+int I2C_WritePayload(uint8_t addr, uint8_t *payload, size_t len);
 int I2C_ReadReg(uint8_t addr, uint8_t reg, uint8_t *val);
+int I2C_ReadPayload(uint8_t addr, uint8_t *tx_payload, size_t tx_len, uint8_t *rx_payload, size_t rx_len);
 
 #endif
