@@ -125,9 +125,9 @@ Wire Wire Line
 NoConn ~ 7100 6100
 Text GLabel 4200 4100 2    50   Input ~ 0
 SAI1_MCLK
-Text GLabel 4200 3900 2    50   Output ~ 0
+Text GLabel 4200 3900 2    50   Input ~ 0
 SAI1_TXC
-Text GLabel 4200 3700 2    50   Output ~ 0
+Text GLabel 4200 3700 2    50   Input ~ 0
 SAI1_TXFS
 Text GLabel 4200 3800 2    50   Output ~ 0
 SAI1_TXD
@@ -360,4 +360,6 @@ Wire Wire Line
 	4000 1900 4200 1900
 NoConn ~ 6500 1900
 NoConn ~ 7600 6000
+Text GLabel 5100 3500 2    50   Output ~ 0
+EPD_RST
 $EndSCHEMATC
