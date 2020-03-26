@@ -43,6 +43,7 @@
 #include "i2c.h"
 #include "epd.h"
 #include "cs43130.h"
+#include "sdcard.h"
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -58,8 +59,13 @@ int main(void) {
 
     printf("Project Bric Bringup\n");
 
-    printf("Initializing SysTick...\n");
-    SysTick_Init();
+    //printf("Initializing SysTick...\n");
+    //SysTick_Init();
+
+    /* SD Card */
+	if (SDC_CheckCardInsert() == 0) {
+		SDC_Init();
+	}
 
     /* Gas Gauge */
     printf("Testing LTC2942 Gas Gauge...\n");
@@ -76,35 +82,50 @@ int main(void) {
     printf("STATUS = %02x\n", regval);
     I2C_ReadReg(LTC2942_ADDR, LTC2942_CTRL, &regval);
     printf("CONTROL = %02x\n", regval);
+
+    // Start voltage measure
+    uint16_t volt;
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, 0xBC);
+    SysTick_DelayTicks(10U);
     I2C_ReadReg(LTC2942_ADDR, LTC2942_VOLT_MSB, &regval);
-    printf("VOLTAGE MSB = %02x\n", regval);
+    volt = regval << 8;
     I2C_ReadReg(LTC2942_ADDR, LTC2942_VOLT_LSB, &regval);
-    printf("VOLTAGE LSB = %02x\n", regval);
-    I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_MSB, &regval);
-    printf("TEMPERATURE MSB = %02x\n", regval);
-    I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_LSB, &regval);
-    printf("TEMPERATURE LSB = %02x\n", regval);
+    volt |= regval & 0xff;
+    uint32_t voltage = (uint32_t)volt * 6000ul / 65536ul;
+    printf("Voltage: %d mV\n", voltage);
+
+    // Start temperature measure
+	uint16_t temp;
+	I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, 0x7C);
+	SysTick_DelayTicks(10U);
+	I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_MSB, &regval);
+	temp = regval << 8;
+	I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_LSB, &regval);
+	temp |= regval & 0xff;
+	uint32_t temperature = (uint32_t)temp * 600ul / 65536ul - 273ul;
+	printf("Temperature: %d degC\n", temperature);
 
     /* SPI Flash */
     /* Not part of the prototype yet */
 
     /* Eink */
-    EPD_Init();
-    EPD_Clear();
+    //EPD_Init();
+    //EPD_Clear();
 
     /* Codec */
+	printf("Initializing audio codec...\n");
+	CS43130_Reset();
     CS43130_Init();
 
-    /* SD Card */
-    if (SDC_CheckCardInsert() == 0) {
-    	SDC_Init();
-    }
+    printf("Initializing audio dma...\n");
+    AUDIO_Init();
+    AUDIO_Start();
 
     /* USB Audio */
 
     while(1) {
     	GPIO_PortToggle(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
-    	SysTick_DelayTicks(1000U);
+    	SysTick_DelayTicks(500U);
     }
     return 0 ;
 }

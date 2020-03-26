@@ -12,7 +12,6 @@
 #include "fsl_common.h"
 #include "fsl_i2c.h"
 #include "fsl_spi.h"
-#include "fsl_i2s.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -32,22 +31,12 @@ extern "C" {
 #define FLEXCOMM3_PERIPHERAL ((SPI_Type *)FLEXCOMM3)
 /* Definition of the clock source frequency */
 #define FLEXCOMM3_CLOCK_SOURCE 12000000UL
-/* BOARD_InitPeripherals defines for FLEXCOMM7 */
-/* Definition of peripheral ID */
-#define FLEXCOMM7_PERIPHERAL ((I2S_Type *)FLEXCOMM7)
-/* Definition of the clock source frequency */
-#define FLEXCOMM7_CLOCK_SOURCE 22579200UL
-/* FLEXCOMM7 interrupt vector ID (number). */
-#define FLEXCOMM7_FLEXCOMM_IRQN FLEXCOMM7_IRQn
-/* FLEXCOMM7 interrupt handler identifier. */
-#define FLEXCOMM7_FLEXCOMM_IRQHANDLER FLEXCOMM7_IRQHandler
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
 extern const i2c_master_config_t FLEXCOMM1_config;
 extern const spi_master_config_t FLEXCOMM3_config;
-extern const i2s_config_t FLEXCOMM7_config;
 
 /***********************************************************************************************************************
  * Initialization functions

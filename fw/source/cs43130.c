@@ -9,6 +9,7 @@
 #include "fsl_common.h"
 #include "i2c.h"
 #include "systick.h"
+#include "pin_mux.h"
 
 // 0110000 if ADR is grounded
 #define CS43130_ADDR       0x30
@@ -62,6 +63,13 @@ void CS43130_PCMPowerUp() {
     CS43130_WriteReg(0x10010, 0x00);
 }
 
+void CS43130_Reset() {
+	GPIO->CLR[BOARD_INITPINS_CODEC_RST_PORT] = 1u << BOARD_INITPINS_CODEC_RST_PIN;
+	SysTick_DelayTicks(10);
+	GPIO->SET[BOARD_INITPINS_CODEC_RST_PORT] = 1u << BOARD_INITPINS_CODEC_RST_PIN;
+	SysTick_DelayTicks(10);
+}
+
 /* Initialization sequence based on Datasheet */
 void CS43130_Init() {
     // Configure XTAL driver
@@ -90,7 +98,9 @@ void CS43130_Init() {
     CS43130_WriteReg(0x40016, 0x3f);
     CS43130_WriteReg(0x40017, 0x00);
     // Set ASP to master, configure clock polarity
-    CS43130_WriteReg(0x40018, 0x1c);
+    //CS43130_WriteReg(0x40018, 0x1c);
+    // Set ASP to slave, configure clock polarity
+    CS43130_WriteReg(0x40018, 0x0c);
     // Configure ASP frame
     CS43130_WriteReg(0x40019, 0x0a);
     // Set ASP channel location
@@ -129,7 +139,10 @@ void CS43130_Init() {
     // Wait at least 150us
     SysTick_DelayTicks(1);
 
-    // Eanble ASP clocks
+    // Enable CLKOUT
+    CS43130_WriteReg(0x20000, 0xf4);
+
+    // Enable ASP clocks
     CS43130_WriteReg(0x1000d, 0x02);
 
     // Power up HP

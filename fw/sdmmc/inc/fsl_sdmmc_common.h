@@ -30,7 +30,7 @@
 /*! @brief Reverse byte sequence for each half word in uint32_t */
 #define SWAP_HALF_WROD_BYTE_SEQUENCE(x) (__REV16(x))
 /*! @brief Maximum loop count to check the card operation voltage range */
-#define FSL_SDMMC_MAX_VOLTAGE_RETRIES (1000U)
+#define FSL_SDMMC_MAX_VOLTAGE_RETRIES (10U)
 /*! @brief Maximum loop count to send the cmd */
 #define FSL_SDMMC_MAX_CMD_RETRIES (10U)
 /*! @brief Default block size */
@@ -56,8 +56,9 @@
 
 /*! @brief SD/MMC error log. */
 #if defined SDMMC_ENABLE_LOG_PRINT
-#include "fsl_debug_console.h"
-#define SDMMC_LOG(...) PRINTF(__VA_ARGS__)
+//#include "fsl_debug_console.h"
+//#define SDMMC_LOG(...) PRINTF(__VA_ARGS__)
+#define SDMMC_LOG(...) printf(__VA_ARGS__)
 #else
 #define SDMMC_LOG(format, ...)
 #endif

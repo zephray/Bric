@@ -50,11 +50,17 @@ void BOARD_InitBootPins(void);
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_13_DIGIMODE_DIGITAL 0x01u
 /*!
+ * @brief Switch between GPIO mode and I2C mode.: I2C mode. */
+#define PIO0_13_EGP_I2C_MODE 0x00u
+/*!
  * @brief Selects pin function.: Alternative connection 5. */
 #define PIO0_13_FUNC_ALT5 0x05u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_14_DIGIMODE_DIGITAL 0x01u
+/*!
+ * @brief Switch between GPIO mode and I2C mode.: I2C mode. */
+#define PIO0_14_EGP_I2C_MODE 0x00u
 /*!
  * @brief Selects pin function.: Alternative connection 6. */
 #define PIO0_14_FUNC_ALT6 0x06u
@@ -116,11 +122,25 @@ void BOARD_InitBootPins(void);
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_24_FUNC_ALT2 0x02u
 /*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO0_24_SLEW_FAST 0x01u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_25_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_25_FUNC_ALT2 0x02u
+/*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO0_25_SLEW_FAST 0x01u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_26_DIGIMODE_DIGITAL 0x01u
@@ -158,6 +178,13 @@ void BOARD_InitBootPins(void);
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_31_FUNC_ALT2 0x02u
 /*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO0_31_SLEW_FAST 0x01u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_3_DIGIMODE_DIGITAL 0x01u
 /*!
@@ -185,23 +212,44 @@ void BOARD_InitBootPins(void);
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_7_FUNC_ALT2 0x02u
 /*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO0_7_SLEW_FAST 0x01u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_8_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_8_FUNC_ALT2 0x02u
 /*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO0_8_SLEW_FAST 0x01u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_9_DIGIMODE_DIGITAL 0x01u
 /*!
- * @brief Selects pin function.: Alternative connection 2. */
-#define PIO0_9_FUNC_ALT2 0x02u
+ * @brief Selects pin function.: Alternative connection 0. */
+#define PIO0_9_FUNC_ALT0 0x00u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO1_0_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO1_0_FUNC_ALT2 0x02u
+/*!
+ * @brief
+ * Driver slew rate.
+ * : Fast-mode, output slew rate is faster.
+ * Refer to the appropriate specific device data sheet for details.
+ */
+#define PIO1_0_SLEW_FAST 0x01u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO1_2_DIGIMODE_DIGITAL 0x01u
@@ -304,6 +352,13 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_PB_STAT_PORT 1U   /*!<@brief PORT device name: 1U */
 #define BOARD_INITPINS_PB_STAT_PIN 3U    /*!<@brief 1U pin index: 3 */
                                          /* @} */
+
+/*! @name PIO0_9 (number 37), SD_PWR_EN
+  @{ */
+#define BOARD_INITPINS_SD_PWR_EN_GPIO GPIO /*!<@brief GPIO device name: GPIO */
+#define BOARD_INITPINS_SD_PWR_EN_PORT 0U   /*!<@brief PORT device name: 0U */
+#define BOARD_INITPINS_SD_PWR_EN_PIN 9U    /*!<@brief 0U pin index: 9 */
+                                           /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

@@ -74,16 +74,16 @@ static void EPD_Write(uint8_t val) {
 	SPI_MasterTransferBlocking(EPD_SPI, &xfer);
 }
 
-static void EPD_BulkWrite(uint8_t *buf, size_t len) {
+/*static void EPD_BulkWrite(uint8_t *buf, size_t len) {
 	spi_transfer_t xfer;
 	uint8_t rx_buff; // 1 byte
 
-	xfer.txData = &val;
+	xfer.txData = buf;
 	xfer.rxData = &rx_buff;
 	xfer.dataSize = 1;
 	xfer.configFlags = kSPI_FrameAssert;
 	SPI_MasterTransferBlocking(EPD_SPI, &xfer);
-}
+}*/
 
 void EPD_WriteCmd(uint8_t cmd) {
 	EPD_DC_L();

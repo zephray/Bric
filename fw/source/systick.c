@@ -8,24 +8,26 @@
 //
 #include "fsl_common.h"
 #include "systick.h"
+#include "fsl_sdmmc_event.h"
 
-static volatile size_t systick_counter;
+//static volatile size_t systick_counter;
 
-void SysTick_Handler() {
+/*void SysTick_Handler() {
     if (systick_counter != 0U) {
         systick_counter--;
     }
-}
+}*/
 
 void SysTick_Init() {
 	/* Set systick reload value to generate 1ms interrupt */
-	if (SysTick_Config(SystemCoreClock / 1000U)) {
-		while (1);
-	}
+	//if (SysTick_Config(SystemCoreClock / 1000U)) {
+	//	while (1);
+	//}
 }
 
 void SysTick_DelayTicks(uint32_t n) {
 	/* Set the counter and wait till it reaches zero */
-	systick_counter = n;
-    while (systick_counter != 0U);
+	//systick_counter = n;
+    //while (systick_counter != 0U);
+	SDMMCEVENT_Delay(n);
 }

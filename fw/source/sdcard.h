@@ -10,5 +10,6 @@
 #define _SDCARD_H_
 
 int SDC_CheckCardInsert();
+int SDC_Init();
 
 #endif /* _SDCARD_H_ */

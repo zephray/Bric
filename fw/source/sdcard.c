@@ -17,7 +17,7 @@ static const sdmmchost_detect_card_t s_sdCardDetect = {
 #else
     .cdType = BOARD_SD_DETECT_TYPE,
 #endif
-    .cdTimeOut_ms = (~0U),
+    .cdTimeOut_ms = (100U),
 };
 
 static FATFS g_fileSystem;
@@ -39,7 +39,7 @@ int SDC_CheckCardInsert() {
     /* power off card */
     SD_PowerOffCard(g_sd.host.base, g_sd.usrParam.pwr);
     /* wait card insert */
-    if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdCardDetect, true) == kStatus_Success)
+    if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdCardDetect, false) == kStatus_Success)
     {
     	printf("\r\nCard inserted.\r\n");
         /* power on the card */
@@ -55,11 +55,14 @@ int SDC_CheckCardInsert() {
 }
 
 int SDC_Init() {
+	FRESULT error;
+	DIR directory; /* Directory object */
+	FILINFO fileInformation;
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 
 	if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
 	{
-		PRINTF("Mount volume failed.\r\n");
+		printf("Mount volume failed.\r\n");
 		return -1;
 	}
 
@@ -67,8 +70,40 @@ int SDC_Init() {
     error = f_chdrive((char const *)driverNumberBuffer);
     if (error)
     {
-        PRINTF("Change drive failed.\r\n");
+        printf("Change drive failed.\r\n");
         return -1;
     }
 #endif
+
+	printf("\r\nList the file in that directory......\r\n");
+	if (f_opendir(&directory, "/"))
+	{
+		printf("Open directory failed.\r\n");
+	   return -1;
+	}
+
+	for (;;)
+	{
+		error = f_readdir(&directory, &fileInformation);
+
+		/* To the end. */
+		if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
+		{
+		   break;
+		}
+		if (fileInformation.fname[0] == '.')
+		{
+		   continue;
+		}
+		if (fileInformation.fattrib & AM_DIR)
+		{
+			printf("Directory file : %s.\r\n", fileInformation.fname);
+		}
+		else
+		{
+			printf("General file : %s.\r\n", fileInformation.fname);
+		}
+	}
+
+    return 0;
 }

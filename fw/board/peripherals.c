@@ -142,81 +142,6 @@ void FLEXCOMM3_init(void) {
 }
 
 /***********************************************************************************************************************
- * FLEXCOMM7 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'FLEXCOMM7'
-- type: 'flexcomm_i2s'
-- mode: 'I2S_Interrupt'
-- custom_name_enabled: 'false'
-- type_id: 'flexcomm_i2s_d821d1d3dded76c4d4194ae52cbf73a5'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'FLEXCOMM7'
-- config_sets:
-  - interrupt:
-    - interrupt_sel: 'kI2S_TxLevelFlag'
-    - enable_irq: 'true'
-    - interrupt:
-      - IRQn: 'FLEXCOMM7_IRQn'
-      - enable_priority: 'false'
-      - priority: '0'
-      - enable_custom_name: 'false'
-    - quick_selection: 'QS_IRQ_priority1'
-  - fsl_i2s:
-    - i2s_config:
-      - usage: 'playback'
-      - masterSlave: 'kI2S_MasterSlaveNormalMaster'
-      - sckPolM: 'false'
-      - wsPolM: 'false'
-      - clockConfig:
-        - sampleRate_Hz: 'kSAI_SampleRate44100Hz'
-        - clockSource: 'FXCOMFunctionClock'
-        - clockSourceFreq: 'BOARD_BootClockRUN'
-        - masterClockDependency: 'false'
-      - mode: 'kI2S_ModeI2sClassic'
-      - dataLengthM: '24'
-      - stereo: 'kSAI_Stereo'
-      - i2s_mono_palcement: 'kSAI_Mono_Left'
-      - positionM: '0'
-      - frameLengthM: '64'
-      - rightLow: 'false'
-      - leftJust: 'false'
-      - watermarkM_Tx: 'ki2s_TxFifo4'
-      - txEmptyZeroTx: 'true'
-      - pack48: 'false'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-/* Flexcomm I2S configuration */
-const i2s_config_t FLEXCOMM7_config = {
-  .masterSlave = kI2S_MasterSlaveNormalMaster,
-  .mode = kI2S_ModeI2sClassic,
-  .rightLow = false,
-  .leftJust = false,
-  .sckPol = false,
-  .wsPol = false,
-  .divider = 8,
-  .oneChannel = false,
-  .dataLength = 24,
-  .frameLength = 64,
-  .position = 0,
-  .watermark = 4,
-  .txEmptyZero = true,
-  .pack48 = false
-};
-
-void FLEXCOMM7_init(void) {
-  RESET_PeripheralReset(kFC7_RST_SHIFT_RSTn);
-  /* Flexcomm I2S initialization */
-  I2S_TxInit(FLEXCOMM7_PERIPHERAL, &FLEXCOMM7_config);
-  /* Enable interrupts */
-  I2S_EnableInterrupts(FLEXCOMM7_PERIPHERAL, (kI2S_TxLevelFlag));
-  /* Enable interrupt FLEXCOMM7_IRQn request in the NVIC */
-  EnableIRQ(FLEXCOMM7_FLEXCOMM_IRQN);
-}
-
-/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
@@ -224,7 +149,6 @@ void BOARD_InitPeripherals(void)
   /* Initialize components */
   FLEXCOMM1_init();
   FLEXCOMM3_init();
-  FLEXCOMM7_init();
 }
 
 /***********************************************************************************************************************
