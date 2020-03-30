@@ -1,4 +1,4 @@
-update=Saturday, March 14, 2020 at 09:24:34 PM
+update=Wednesday, March 25, 2020 at 09:01:40 PM
 version=1
 last_client=kicad
 [general]
@@ -12,6 +12,16 @@ NetIExt=net
 version=1
 LibDir=
 [eeschema/libraries]
+[schematic_editor]
+version=1
+PageLayoutDescrFile=
+PlotDirectoryName=
+SubpartIdSeparator=0
+SubpartFirstId=65
+NetFmtName=
+SpiceAjustPassiveValues=0
+LabSize=50
+ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
 PageLayoutDescrFile=
@@ -248,7 +258,7 @@ dPairViaGap=0.25
 [pcbnew/Netclasses/1]
 Name=USB
 Clearance=0.1524
-TrackWidth=0.18
+TrackWidth=0.2286
 ViaDiameter=0.65
 ViaDrill=0.3
 uViaDiameter=0.4
@@ -256,13 +266,3 @@ uViaDrill=0.2
 dPairWidth=0.1
 dPairGap=0.1
 dPairViaGap=0.25
-[schematic_editor]
-version=1
-PageLayoutDescrFile=
-PlotDirectoryName=
-SubpartIdSeparator=0
-SubpartFirstId=65
-NetFmtName=
-SpiceAjustPassiveValues=0
-LabSize=50
-ERC_TestSimilarLabels=1

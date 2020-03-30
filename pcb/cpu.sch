@@ -140,7 +140,7 @@ Wire Wire Line
 Text Notes 5200 3800 2    50   ~ 0
 To Audio DAC\n
 Text GLabel 4200 2700 2    50   Output ~ 0
-~SD0_PWR_EN
+SD0_PWR_EN
 Text GLabel 4200 2500 2    50   Output ~ 0
 SD0_CLK
 Text GLabel 4200 2600 2    50   Output ~ 0
@@ -155,44 +155,6 @@ Text GLabel 6700 1800 2    50   Output ~ 0
 SD0_D3
 Text GLabel 4200 3500 2    50   Input ~ 0
 ~SD0_CD
-Wire Wire Line
-	4900 1400 4500 1400
-$Comp
-L Device:R R111
-U 1 1 5DA7199D
-P 4900 1550
-F 0 "R111" H 4970 1596 50  0000 L CNN
-F 1 "10K" H 4970 1505 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4830 1550 50  0001 C CNN
-F 3 "~" H 4900 1550 50  0001 C CNN
-	1    4900 1550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Device:R R110
-U 1 1 5DA710EB
-P 4500 1550
-F 0 "R110" H 4570 1596 50  0000 L CNN
-F 1 "10K" H 4570 1505 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 4430 1550 50  0001 C CNN
-F 3 "~" H 4500 1550 50  0001 C CNN
-	1    4500 1550
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	4000 3100 4500 3100
-Wire Wire Line
-	4500 1700 4500 3100
-Wire Wire Line
-	4900 1700 4900 3200
-Wire Wire Line
-	4000 3200 4900 3200
-Connection ~ 4900 3200
-Wire Wire Line
-	4900 3200 5100 3200
-Connection ~ 4500 3100
-Wire Wire Line
-	4500 3100 5100 3100
 Text GLabel 5100 3100 2    50   BiDi ~ 0
 I2C1_SDA
 Text GLabel 5100 3200 2    50   Output ~ 0
@@ -290,18 +252,6 @@ Text Label 4900 5950 0    50   ~ 0
 LED
 Wire Wire Line
 	4900 5950 5100 5950
-$Comp
-L power:+3V3 #PWR0106
-U 1 1 5DB9934B
-P 4500 1400
-F 0 "#PWR0106" H 4500 1250 50  0001 C CNN
-F 1 "+3V3" H 4515 1573 50  0000 C CNN
-F 2 "" H 4500 1400 50  0001 C CNN
-F 3 "" H 4500 1400 50  0001 C CNN
-	1    4500 1400
-	1    0    0    -1  
-$EndComp
-Connection ~ 4500 1400
 Text GLabel 4200 3600 2    50   Output ~ 0
 CODEC_RST
 Wire Wire Line
@@ -358,8 +308,13 @@ Text GLabel 4200 1900 2    50   Output ~ 0
 EPD_DC
 Wire Wire Line
 	4000 1900 4200 1900
-NoConn ~ 6500 1900
 NoConn ~ 7600 6000
-Text GLabel 5100 3500 2    50   Output ~ 0
+Text GLabel 6700 1900 2    50   Output ~ 0
 EPD_RST
+Wire Wire Line
+	4000 3100 5100 3100
+Wire Wire Line
+	4000 3200 5100 3200
+Wire Wire Line
+	6500 1900 6700 1900
 $EndSCHEMATC
