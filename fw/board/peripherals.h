@@ -25,12 +25,12 @@ extern "C" {
 /* Definition of peripheral ID */
 #define FLEXCOMM1_PERIPHERAL ((I2C_Type *)FLEXCOMM1)
 /* Definition of the clock source frequency */
-#define FLEXCOMM1_CLOCK_SOURCE 12000000UL
+#define FLEXCOMM1_CLOCK_SOURCE 16000000UL
 /* BOARD_InitPeripherals defines for FLEXCOMM3 */
 /* Definition of peripheral ID */
 #define FLEXCOMM3_PERIPHERAL ((SPI_Type *)FLEXCOMM3)
 /* Definition of the clock source frequency */
-#define FLEXCOMM3_CLOCK_SOURCE 12000000UL
+#define FLEXCOMM3_CLOCK_SOURCE 16000000UL
 
 /***********************************************************************************************************************
  * Global variables

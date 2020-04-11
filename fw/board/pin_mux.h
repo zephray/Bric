@@ -50,14 +50,23 @@ void BOARD_InitBootPins(void);
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_13_DIGIMODE_DIGITAL 0x01u
 /*!
+ * @brief Pull-up current source enable in I2C mode.: Enabled. Pull resistor is conencted. */
+#define PIO0_13_ECS_ENABLED 0x01u
+/*!
  * @brief Switch between GPIO mode and I2C mode.: I2C mode. */
 #define PIO0_13_EGP_I2C_MODE 0x00u
 /*!
  * @brief Selects pin function.: Alternative connection 5. */
 #define PIO0_13_FUNC_ALT5 0x05u
 /*!
+ * @brief Selects function mode (on-chip pull-up/pull-down resistor control).: Pull-up. Pull-up resistor enabled. */
+#define PIO0_13_MODE_PULL_UP 0x02u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_14_DIGIMODE_DIGITAL 0x01u
+/*!
+ * @brief Pull-up current source enable in I2C mode.: Enabled. Pull resistor is conencted. */
+#define PIO0_14_ECS_ENABLED 0x01u
 /*!
  * @brief Switch between GPIO mode and I2C mode.: I2C mode. */
 #define PIO0_14_EGP_I2C_MODE 0x00u
@@ -65,17 +74,26 @@ void BOARD_InitBootPins(void);
  * @brief Selects pin function.: Alternative connection 6. */
 #define PIO0_14_FUNC_ALT6 0x06u
 /*!
+ * @brief Selects function mode (on-chip pull-up/pull-down resistor control).: Pull-up. Pull-up resistor enabled. */
+#define PIO0_14_MODE_PULL_UP 0x02u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_17_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 2. */
 #define PIO0_17_FUNC_ALT2 0x02u
 /*!
+ * @brief Input polarity.: Enabled. Input is function inverted. */
+#define PIO0_17_INVERT_ENABLED 0x01u
+/*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_18_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 0. */
 #define PIO0_18_FUNC_ALT0 0x00u
+/*!
+ * @brief Controls open-drain mode.: Open-drain. Simulated open-drain output (high drive disabled). */
+#define PIO0_18_OD_OPEN_DRAIN 0x01u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO0_19_DIGIMODE_DIGITAL 0x01u
@@ -252,6 +270,12 @@ void BOARD_InitBootPins(void);
 #define PIO1_0_SLEW_FAST 0x01u
 /*!
  * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
+#define PIO1_1_DIGIMODE_DIGITAL 0x01u
+/*!
+ * @brief Selects pin function.: Alternative connection 0. */
+#define PIO1_1_FUNC_ALT0 0x00u
+/*!
+ * @brief Select Digital mode.: Enable Digital mode. Digital input is enabled. */
 #define PIO1_2_DIGIMODE_DIGITAL 0x01u
 /*!
  * @brief Selects pin function.: Alternative connection 0. */
@@ -359,6 +383,13 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_SD_PWR_EN_PORT 0U   /*!<@brief PORT device name: 0U */
 #define BOARD_INITPINS_SD_PWR_EN_PIN 9U    /*!<@brief 0U pin index: 9 */
                                            /* @} */
+
+/*! @name PIO1_1 (number 39), EPD_RST
+  @{ */
+#define BOARD_INITPINS_EPD_RST_GPIO GPIO /*!<@brief GPIO device name: GPIO */
+#define BOARD_INITPINS_EPD_RST_PORT 1U   /*!<@brief PORT device name: 1U */
+#define BOARD_INITPINS_EPD_RST_PIN 1U    /*!<@brief 1U pin index: 1 */
+                                         /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

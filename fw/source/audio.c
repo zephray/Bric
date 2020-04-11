@@ -14,7 +14,8 @@
 #define AUDIO_I2S_TX (I2S7)
 #define AUDIO_DMA (DMA0)
 #define AUDIO_I2S_TX_CHANNEL (19)
-#define ADUIO_I2S_TX_MODE (kI2S_MasterSlaveNormalMaster)
+#define AUDIO_I2S_TX_MODE (kI2S_MasterSlaveNormalSlave)
+//#define AUDIO_I2S_TX_MODE (kI2S_MasterSlaveNormalMaster)
 #define AUDIO_I2S_DATA (32) // 32 bit per sample
 #define AUDIO_I2S_FRAME (64) // 64 bit per frame
 #define I2S_CLOCK_DIVIDER (AUDIO_I2S_MASTER_CLOCK_FREQUENCY / 44100U / AUDIO_I2S_FRAME)
@@ -242,7 +243,7 @@ void AUDIO_Init() {
      */
     I2S_TxGetDefaultConfig(&s_TxConfig);
     s_TxConfig.divider = I2S_CLOCK_DIVIDER;
-    s_TxConfig.masterSlave = ADUIO_I2S_TX_MODE;
+    s_TxConfig.masterSlave = AUDIO_I2S_TX_MODE;
     s_TxConfig.dataLength = AUDIO_I2S_DATA;
     s_TxConfig.frameLength = AUDIO_I2S_FRAME;
     I2S_TxInit(AUDIO_I2S_TX, &s_TxConfig);

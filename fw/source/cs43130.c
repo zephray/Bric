@@ -63,11 +63,21 @@ void CS43130_PCMPowerUp() {
     CS43130_WriteReg(0x10010, 0x00);
 }
 
+/* PCM power down sequence based on Datasheet */
+void CS43130_PCMPowerDown() {
+	// Power down amplifier
+	CS43130_WriteReg(0x20000, CS43130_ReadReg(0x20000) | 0x10);
+	// Wait for power down to finish
+	while (!(CS43130_ReadReg(0xf0000) & 0x01));
+	// Power down ASP
+	CS43130_WriteReg(0x20000, CS43130_ReadReg(0x20000) | 0x40);
+}
+
 void CS43130_Reset() {
 	GPIO->CLR[BOARD_INITPINS_CODEC_RST_PORT] = 1u << BOARD_INITPINS_CODEC_RST_PIN;
-	SysTick_DelayTicks(10);
+	SysTick_DelayTicks(100);
 	GPIO->SET[BOARD_INITPINS_CODEC_RST_PORT] = 1u << BOARD_INITPINS_CODEC_RST_PIN;
-	SysTick_DelayTicks(10);
+	SysTick_DelayTicks(100);
 }
 
 /* Initialization sequence based on Datasheet */
@@ -84,7 +94,7 @@ void CS43130_Init() {
     // Set ASP sample rate to 44.1kHz
     CS43130_WriteReg(0x1000b, 0x01);
     // Set ASP sample bit size
-    CS43130_WriteReg(0x1000c, 0x06); // 0x05: 24bits 0x06: 16bits
+    CS43130_WriteReg(0x1000c, 0x06); // 0x00: 32 bits, 0x05: 24bits 0x06: 16bits
     // Set ASP numerator
     CS43130_WriteReg(0x40010, 0x01);
     CS43130_WriteReg(0x40011, 0x00);
@@ -98,17 +108,21 @@ void CS43130_Init() {
     CS43130_WriteReg(0x40016, 0x3f);
     CS43130_WriteReg(0x40017, 0x00);
     // Set ASP to master, configure clock polarity
-    //CS43130_WriteReg(0x40018, 0x1c);
+    CS43130_WriteReg(0x40018, 0x1c); //0x1c
     // Set ASP to slave, configure clock polarity
-    CS43130_WriteReg(0x40018, 0x0c);
+    //CS43130_WriteReg(0x40018, 0x0c);
     // Configure ASP frame
     CS43130_WriteReg(0x40019, 0x0a);
     // Set ASP channel location
     CS43130_WriteReg(0x50000, 0x00);
     CS43130_WriteReg(0x50001, 0x00);
     // Set ASP channel size and enable
-    CS43130_WriteReg(0x5000a, 0x07);
-    CS43130_WriteReg(0x5000b, 0x0f);
+    // For 16 bit per sample
+    CS43130_WriteReg(0x5000a, 0x05);
+	CS43130_WriteReg(0x5000b, 0x0d);
+    // For 32 bit per sample
+    //CS43130_WriteReg(0x5000a, 0x07);
+    //CS43130_WriteReg(0x5000b, 0x0f);
 
     // Configure PCM filter
     CS43130_WriteReg(0x90000, 0x02);
@@ -147,4 +161,24 @@ void CS43130_Init() {
 
     // Power up HP
     CS43130_PCMPowerUp();
+}
+
+// Vol: 0x00 = mute, 0xFF = 0 dB
+void CS43130_SetVolume(uint8_t vol) {
+	// Set volume for channel B
+	CS43130_WriteReg(0x90001, ~vol);
+	// Set volume for channel A
+	CS43130_WriteReg(0x90002, ~vol);
+}
+
+void CS43130_SwitchFreq(int freq) {
+	if (freq == 44100) {
+
+	}
+	else if (freq == 48000) {
+
+	}
+	else {
+		printf("Unsupported sample rate: %d\n", freq);
+	}
 }

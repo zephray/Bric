@@ -37,6 +37,7 @@
                <pin_label pin_num="41" pin_signal="PIO1_2/CTIMER0_MAT3/SCT_GPI6/HS_SPI_SCK/USB1_PORTPWRN/PLU_OUT5" label="CHRG" identifier="CHRG"/>
                <pin_label pin_num="42" pin_signal="PIO1_3/SCT0_OUT4/HS_SPI_MISO/USB0_PORTPWRN/PLU_OUT6" label="PB_STAT" identifier="PB_STAT"/>
                <pin_label pin_num="37" pin_signal="PIO0_9/FC3_SSEL2/SD0_POW_EN/FC5_TXD_SCL_MISO_WS/SECURE_GPIO0_9/ACMP0_B" label="SD_PWR_EN" identifier="SD_PWR_eN;SD_PWR_EN"/>
+               <pin_label pin_num="39" pin_signal="PIO1_1/FC3_RXD_SDA_MOSI_DATA/CT_INP3/SCT_GPI5/HS_SPI_SSEL1/USB1_OVERCURRENTN/PLU_OUT4" label="EPD_RST" identifier="EPD_RST"/>
             </pin_labels>
          </pins_profile>
          <functions_list>
@@ -74,6 +75,11 @@
                      </feature>
                   </dependency>
                   <dependency resourceType="Peripheral" resourceId="FLEXCOMM3" description="Peripheral FLEXCOMM3 is not initialized" problem_level="1" source="Pins:BOARD_InitPins">
+                     <feature name="initialized" evaluation="equal">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="Peripheral" resourceId="USBHSH" description="Peripheral USBHSH is not initialized" problem_level="1" source="Pins:BOARD_InitPins">
                      <feature name="initialized" evaluation="equal">
                         <data>true</data>
                      </feature>
@@ -120,7 +126,11 @@
                         <pin_feature name="slew_rate" value="fast"/>
                      </pin_features>
                   </pin>
-                  <pin peripheral="SDIF" signal="SD0_CARD_DET" pin_num="3" pin_signal="PIO0_17/FC4_SSEL2/SD0_CARD_DET_N/SCT_GPI7/SCT0_OUT0/SD0_CARD_INT_N/PLU_IN2/SECURE_GPIO0_17"/>
+                  <pin peripheral="SDIF" signal="SD0_CARD_DET" pin_num="3" pin_signal="PIO0_17/FC4_SSEL2/SD0_CARD_DET_N/SCT_GPI7/SCT0_OUT0/SD0_CARD_INT_N/PLU_IN2/SECURE_GPIO0_17">
+                     <pin_features>
+                        <pin_feature name="invert" value="enabled"/>
+                     </pin_features>
+                  </pin>
                   <pin peripheral="GPIO" signal="PIO0, 1" pin_num="2" pin_signal="PIO0_1/FC3_CTS_SDA_SSEL0/CT_INP0/SCT_GPI1/SD1_CLK/CMP0_OUT/SECURE_GPIO0_1">
                      <pin_features>
                         <pin_feature name="direction" value="OUTPUT"/>
@@ -135,11 +145,15 @@
                   </pin>
                   <pin peripheral="FLEXCOMM1" signal="RXD_SDA_MOSI_DATA" pin_num="46" pin_signal="PIO0_13/FC1_CTS_SDA_SSEL0/UTICK_CAP0/CT_INP0/SCT_GPI0/FC1_RXD_SDA_MOSI_DATA/PLU_IN0/SECURE_GPIO0_13">
                      <pin_features>
+                        <pin_feature name="mode" value="pullUp"/>
+                        <pin_feature name="ecs" value="enabled"/>
                         <pin_feature name="egp" value="i2c"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="FLEXCOMM1" signal="TXD_SCL_MISO_WS" pin_num="47" pin_signal="PIO0_14/FC1_RTS_SCL_SSEL1/UTICK_CAP1/CT_INP1/SCT_GPI1/FC1_TXD_SCL_MISO_WS/PLU_IN1/SECURE_GPIO0_14">
                      <pin_features>
+                        <pin_feature name="mode" value="pullUp"/>
+                        <pin_feature name="ecs" value="enabled"/>
                         <pin_feature name="egp" value="i2c"/>
                      </pin_features>
                   </pin>
@@ -191,6 +205,7 @@
                      <pin_features>
                         <pin_feature name="direction" value="OUTPUT"/>
                         <pin_feature name="gpio_init_state" value="true"/>
+                        <pin_feature name="open_drain" value="enabled"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="GPIO" signal="PIO0, 26" pin_num="40" pin_signal="PIO0_26/FC2_RXD_SDA_MOSI_DATA/CLKOUT/CT_INP14/SCT0_OUT5/USB0_IDVALUE/FC0_SCK/HS_SPI_MOSI/SECURE_GPIO0_26">
@@ -212,7 +227,16 @@
                      <pin_features>
                         <pin_feature name="identifier" value="SD_PWR_EN"/>
                         <pin_feature name="direction" value="OUTPUT"/>
-                        <pin_feature name="gpio_init_state" value="false"/>
+                        <pin_feature name="gpio_init_state" value="true"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="USBHSH" signal="USB_VBUS" pin_num="25" pin_signal="USB1_VBUS"/>
+                  <pin peripheral="USBHSH" signal="USB_DM" pin_num="24" pin_signal="USB1_DM"/>
+                  <pin peripheral="USBHSH" signal="USB_DP" pin_num="23" pin_signal="USB1_DP"/>
+                  <pin peripheral="GPIO" signal="PIO1, 1" pin_num="39" pin_signal="PIO1_1/FC3_RXD_SDA_MOSI_DATA/CT_INP3/SCT_GPI5/HS_SPI_SSEL1/USB1_OVERCURRENTN/PLU_OUT4">
+                     <pin_features>
+                        <pin_feature name="direction" value="OUTPUT"/>
+                        <pin_feature name="gpio_init_state" value="true"/>
                      </pin_features>
                   </pin>
                </pins>
@@ -232,6 +256,26 @@
                <description></description>
                <options/>
                <dependencies>
+                  <dependency resourceType="PinSignal" resourceId="SYSCON.XTALIN" description="&apos;XTALIN&apos; (Pins tool id: SYSCON.XTALIN, Clocks tool id: SYSCON.XTALIN) needs to be routed" problem_level="1" source="Clocks:BOARD_BootClockRUN">
+                     <feature name="routed" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PinSignal" resourceId="SYSCON.XTALIN" description="&apos;XTALIN&apos; (Pins tool id: SYSCON.XTALIN, Clocks tool id: SYSCON.XTALIN) needs to have &apos;INPUT&apos; direction" problem_level="1" source="Clocks:BOARD_BootClockRUN">
+                     <feature name="direction" evaluation="">
+                        <data>INPUT</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PinSignal" resourceId="SYSCON.XTALOUT" description="&apos;XTALOUT&apos; (Pins tool id: SYSCON.XTALOUT, Clocks tool id: SYSCON.XTALOUT) needs to be routed" problem_level="1" source="Clocks:BOARD_BootClockRUN">
+                     <feature name="routed" evaluation="">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="PinSignal" resourceId="SYSCON.XTALOUT" description="&apos;XTALOUT&apos; (Pins tool id: SYSCON.XTALOUT, Clocks tool id: SYSCON.XTALOUT) needs to have &apos;OUTPUT&apos; direction" problem_level="1" source="Clocks:BOARD_BootClockRUN">
+                     <feature name="direction" evaluation="">
+                        <data>OUTPUT</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="PinSignal" resourceId="SYSCON.MCLK" description="&apos;MCLKIN&apos; (Pins tool id: SYSCON.MCLK, Clocks tool id: SYSCON.MCLKIN) needs to be routed" problem_level="1" source="Clocks:BOARD_BootClockRUN">
                      <feature name="routed" evaluation="">
                         <data>true</data>
@@ -259,30 +303,34 @@
                   </dependency>
                </dependencies>
                <clock_sources>
-                  <clock_source id="SYSCON.XTAL32M.outFreq" value="24 MHz" locked="false" enabled="false"/>
+                  <clock_source id="SYSCON.XTAL32M.outFreq" value="16 MHz" locked="false" enabled="true"/>
                   <clock_source id="SYSCON.mclk_in.outFreq" value="11.2896 MHz" locked="false" enabled="true"/>
                </clock_sources>
                <clock_outputs>
-                  <clock_output id="FXCOM1_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FXCOM3_clock.outFreq" value="12 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM1_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM3_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
                   <clock_output id="FXCOM7_clock.outFreq" value="11.2896 MHz" locked="false" accuracy=""/>
-                  <clock_output id="SDIO_clock.outFreq" value="48 MHz" locked="false" accuracy=""/>
-                  <clock_output id="System_clock.outFreq" value="96 MHz" locked="false" accuracy=""/>
+                  <clock_output id="SDIO_clock.outFreq" value="128/3 MHz" locked="false" accuracy=""/>
+                  <clock_output id="System_clock.outFreq" value="128 MHz" locked="false" accuracy=""/>
+                  <clock_output id="USB1_PHY_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
                </clock_outputs>
                <clock_settings>
                   <setting id="PLL0_Mode" value="Normal" locked="false"/>
+                  <setting id="ANALOG_CONTROL_FRO192M_CTRL_ENDI_FRO_12M_CFG" value="Disable" locked="false"/>
                   <setting id="ENABLE_CLKIN_ENA" value="Enabled" locked="false"/>
+                  <setting id="ENABLE_PLL_USB_OUT" value="Enabled" locked="false"/>
                   <setting id="ENABLE_SYSTEM_CLK_OUT" value="Enabled" locked="false"/>
-                  <setting id="SYSCON.FCCLKSEL1.sel" value="ANACTRL.fro_12m_clk" locked="false"/>
-                  <setting id="SYSCON.FCCLKSEL3.sel" value="ANACTRL.fro_12m_clk" locked="false"/>
+                  <setting id="SYSCON.FCCLKSEL1.sel" value="SYSCON.PLL0DIV" locked="false"/>
+                  <setting id="SYSCON.FCCLKSEL3.sel" value="SYSCON.PLL0DIV" locked="false"/>
                   <setting id="SYSCON.FCCLKSEL7.sel" value="SYSCON.mclk_in" locked="false"/>
                   <setting id="SYSCON.FRGCTRL1_DIV.scale" value="256" locked="true"/>
                   <setting id="SYSCON.MAINCLKSELA.sel" value="ANACTRL.fro_hf_clk" locked="false"/>
                   <setting id="SYSCON.MAINCLKSELB.sel" value="SYSCON.PLL0_BYPASS" locked="false"/>
-                  <setting id="SYSCON.PLL0CLKSEL.sel" value="ANACTRL.fro_12m_clk" locked="false"/>
+                  <setting id="SYSCON.PLL0CLKSEL.sel" value="SYSCON.CLK_IN_EN" locked="false"/>
+                  <setting id="SYSCON.PLL0DIV.scale" value="8" locked="true"/>
                   <setting id="SYSCON.PLL0M_MULT.scale" value="32" locked="false"/>
                   <setting id="SYSCON.PLL0_PDEC.scale" value="4" locked="true"/>
-                  <setting id="SYSCON.SDIOCLKDIV.scale" value="2" locked="false"/>
+                  <setting id="SYSCON.SDIOCLKDIV.scale" value="3" locked="false"/>
                   <setting id="SYSCON.SDIOCLKSEL.sel" value="SYSCON.MAINCLKSELB" locked="false"/>
                </clock_settings>
                <called_from_default_init>true</called_from_default_init>
@@ -298,22 +346,22 @@
       </dcdx>
       <periphs name="Peripherals" version="7.0" enabled="true" update_project_code="true">
          <dependencies>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_i2c" description="在工具链/IDE 工程中未找到FLEXCOMM I2C Driver。该工程不会被编译！" problem_level="2" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_i2c" description="FLEXCOMM I2C Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_i2c" description="该工具链/IDE 工程不支持FLEXCOMM I2C Driver版本。所需：${required_value}, 实际：${actual_value}. 工程编译可能不正确。" problem_level="1" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_i2c" description="Unsupported version of the FLEXCOMM I2C Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="equivalent">
                   <data type="Version">2.0.1</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_spi" description="在工具链/IDE 工程中未找到FLEXCOMM SPI Driver。该工程不会被编译！" problem_level="2" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_spi" description="FLEXCOMM SPI Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_spi" description="该工具链/IDE 工程不支持FLEXCOMM SPI Driver版本。所需：${required_value}, 实际：${actual_value}. 工程编译可能不正确。" problem_level="1" source="Peripherals">
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_spi" description="Unsupported version of the FLEXCOMM SPI Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
                <feature name="version" evaluation="equivalent">
                   <data type="Version">2.1.0</data>
                </feature>
@@ -331,42 +379,42 @@
                <description></description>
                <options/>
                <dependencies>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM1.i2c_scl" description="Signal I2C serial clock of the peripheral FLEXCOMM1 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM1.i2c_scl" description="Signal I2C serial clock of the peripheral FLEXCOMM1 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM1.i2c_sda" description="Signal I2C serial data of the peripheral FLEXCOMM1 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM1.i2c_sda" description="Signal I2C serial data of the peripheral FLEXCOMM1 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="FXCOM1_clock" description="FXCOM1 clock is inactive.问题必须在其它工具中被解决。" problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="ClockOutput" resourceId="FXCOM1_clock" description="FXCOM1 clock is inactive. Problem must be resolved in another tool." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="frequency" evaluation="greaterThan">
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_miso" description="Signal SPI master data in, slave data out of the peripheral FLEXCOMM3 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_miso" description="Signal SPI master data in, slave data out of the peripheral FLEXCOMM3 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_mosi" description="Signal SPI master data out, slave data in of the peripheral FLEXCOMM3 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_mosi" description="Signal SPI master data out, slave data in of the peripheral FLEXCOMM3 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_sck" description="Signal SPI serial clock pin of the peripheral FLEXCOMM3 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_sck" description="Signal SPI serial clock pin of the peripheral FLEXCOMM3 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_ss0" description="Signal SPI slave select 0 of the peripheral FLEXCOMM3 is not routed.问题必须在其它工具中被解决。" problem_level="1" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM3.spi_ss0" description="Signal SPI slave select 0 of the peripheral FLEXCOMM3 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="FXCOM3_clock" description="FXCOM3 clock is inactive.问题必须在其它工具中被解决。" problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                  <dependency resourceType="ClockOutput" resourceId="FXCOM3_clock" description="FXCOM3 clock is inactive. Problem must be resolved in another tool." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="frequency" evaluation="greaterThan">
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
@@ -396,7 +444,7 @@
                            <setting name="polarity" value="kSPI_ClockPolarityActiveHigh"/>
                            <setting name="phase" value="kSPI_ClockPhaseFirstEdge"/>
                            <setting name="direction" value="kSPI_MsbFirst"/>
-                           <setting name="baudRate_Bps" value="12000000"/>
+                           <setting name="baudRate_Bps" value="4000000"/>
                            <setting name="dataWidth" value="kSPI_Data8Bits"/>
                            <setting name="sselNum" value="kSPI_Ssel0"/>
                            <set name="sselPol_set">
@@ -461,7 +509,7 @@
             <component name="system" uuid="fbf6e776-1a54-40f8-9be8-90813cc16651" type_id="system_54b53072540eeeb8f8e9343e71f28176">
                <config_set_global name="global_system_definitions"/>
             </component>
-            <component name="msg" uuid="dbd3c1e2-7202-47e8-bb5d-546a64069a8c" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
+            <component name="msg" uuid="56dda19f-5fc4-4b27-9290-0ba41b8d5062" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
                <config_set_global name="global_messages"/>
             </component>
          </components>

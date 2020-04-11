@@ -37,6 +37,8 @@
 #include "peripherals.h"
 #include "pin_mux.h"
 #include "clock_config.h"
+#include "fsl_power.h"
+#include "fsl_clock.h"
 #include "LPC5528.h"
 #include "fsl_gpio.h"
 #include "systick.h"
@@ -55,7 +57,10 @@ int main(void) {
   	/* Init board hardware. */
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
+    //BOARD_BootClockFROHF96M();
     BOARD_InitBootPeripherals();
+
+    GPIO_PortSet(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
 
     printf("Project Bric Bringup\n");
 
@@ -68,8 +73,8 @@ int main(void) {
 	}
 
     /* Gas Gauge */
-    printf("Testing LTC2942 Gas Gauge...\n");
-    /* LTC2942 address 1100100 */
+/*    printf("Testing LTC2942 Gas Gauge...\n");
+     LTC2942 address 1100100
 #define LTC2942_ADDR 0x64
 #define LTC2942_STATUS 0x00
 #define LTC2942_CTRL 0x01
@@ -103,7 +108,7 @@ int main(void) {
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_LSB, &regval);
 	temp |= regval & 0xff;
 	uint32_t temperature = (uint32_t)temp * 600ul / 65536ul - 273ul;
-	printf("Temperature: %d degC\n", temperature);
+	printf("Temperature: %d degC\n", temperature);*/
 
     /* SPI Flash */
     /* Not part of the prototype yet */
@@ -111,21 +116,29 @@ int main(void) {
     /* Eink */
     //EPD_Init();
     //EPD_Clear();
+    //EPD_SwitchToGreyscale();
+    //EPD_Test();
+    //EPD_Test2();
+    //EPD_DeepSleep();
 
     /* Codec */
 	printf("Initializing audio codec...\n");
 	CS43130_Reset();
     CS43130_Init();
 
-    printf("Initializing audio dma...\n");
-    AUDIO_Init();
-    AUDIO_Start();
+    //printf("Initializing audio dma...\n");
+    //AUDIO_Init();
+    //AUDIO_Start();
 
     /* USB Audio */
+	USB_AudioSpeakerInit();
+
+	GPIO_PortClear(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
 
     while(1) {
-    	GPIO_PortToggle(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
-    	SysTick_DelayTicks(500U);
+    	//GPIO_PortToggle(GPIO, BOARD_INITPINS_LED_PORT, 1u << BOARD_INITPINS_LED_PIN);
+    	//SysTick_DelayTicks(500U);
+    	USB_AudioSpeakerLoop();
     }
     return 0 ;
 }

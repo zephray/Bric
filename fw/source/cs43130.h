@@ -10,5 +10,6 @@
 #define _CS43130_H_
 
 void CS43130_Init();
+void CS43130_SetVolume();
 
 #endif /* _CS43130_H_ */

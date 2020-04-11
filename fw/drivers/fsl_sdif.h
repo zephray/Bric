@@ -43,7 +43,7 @@
  */
 /*! @brief High speed mode clk_sample fixed delay*/
 #ifndef SDIF_HIGHSPEED_SAMPLE_DELAY
-#define SDIF_HIGHSPEED_SAMPLE_DELAY (12U) /*!< 12 * 250ps = 3ns */
+#define SDIF_HIGHSPEED_SAMPLE_DELAY (20U) /*!< 12 * 250ps = 3ns */
 #endif
 /*! @brief High speed mode clk_drv fixed delay */
 #ifndef SDIF_HIGHSPEED_DRV_DELAY
@@ -67,7 +67,7 @@
 #endif
 /*! @brief default mode sample fixed delay */
 #ifndef SDIF_DEFAULT_MODE_SAMPLE_DELAY
-#define SDIF_DEFAULT_MODE_SAMPLE_DELAY (12U) /*!< 12 * 250ps = 3ns */
+#define SDIF_DEFAULT_MODE_SAMPLE_DELAY (20U) /*!< 12 * 250ps = 3ns */
 #endif
 
 #ifndef SDIF_DEFAULT_MODE_DRV_DELAY

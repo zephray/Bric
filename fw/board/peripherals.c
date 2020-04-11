@@ -102,7 +102,7 @@ instance:
       - polarity: 'kSPI_ClockPolarityActiveHigh'
       - phase: 'kSPI_ClockPhaseFirstEdge'
       - direction: 'kSPI_MsbFirst'
-      - baudRate_Bps: '12000000'
+      - baudRate_Bps: '4000000'
       - dataWidth: 'kSPI_Data8Bits'
       - sselNum: 'kSPI_Ssel0'
       - sselPol_set: ''
@@ -121,7 +121,7 @@ const spi_master_config_t FLEXCOMM3_config = {
   .polarity = kSPI_ClockPolarityActiveHigh,
   .phase = kSPI_ClockPhaseFirstEdge,
   .direction = kSPI_MsbFirst,
-  .baudRate_Bps = 12000000,
+  .baudRate_Bps = 4000000,
   .dataWidth = kSPI_Data8Bits,
   .sselNum = kSPI_Ssel0,
   .sselPol = kSPI_SpolActiveAllLow,
