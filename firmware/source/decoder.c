@@ -15,6 +15,7 @@
 #include "queue.h"
 #include "ff.h"
 #include "sdcard.h"
+#include "arm_math.h"
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
 #include "decoder.h"

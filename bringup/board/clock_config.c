@@ -56,11 +56,11 @@ void BOARD_InitBootClocks(void)
 name: BOARD_BootClockRUN
 called_from_default_init: true
 outputs:
-- {id: FXCOM1_clock.outFreq, value: 16 MHz}
-- {id: FXCOM3_clock.outFreq, value: 16 MHz}
+- {id: FXCOM1_clock.outFreq, value: 37.5 MHz}
+- {id: FXCOM3_clock.outFreq, value: 37.5 MHz}
 - {id: FXCOM7_clock.outFreq, value: 11.2896 MHz}
-- {id: SDIO_clock.outFreq, value: 128/3 MHz}
-- {id: System_clock.outFreq, value: 128 MHz}
+- {id: SDIO_clock.outFreq, value: 50 MHz}
+- {id: System_clock.outFreq, value: 150 MHz}
 - {id: USB1_PHY_clock.outFreq, value: 16 MHz}
 settings:
 - {id: PLL0_Mode, value: Normal}
@@ -75,9 +75,10 @@ settings:
 - {id: SYSCON.MAINCLKSELA.sel, value: ANACTRL.fro_hf_clk}
 - {id: SYSCON.MAINCLKSELB.sel, value: SYSCON.PLL0_BYPASS}
 - {id: SYSCON.PLL0CLKSEL.sel, value: SYSCON.CLK_IN_EN}
-- {id: SYSCON.PLL0DIV.scale, value: '8', locked: true}
-- {id: SYSCON.PLL0M_MULT.scale, value: '32'}
-- {id: SYSCON.PLL0_PDEC.scale, value: '4', locked: true}
+- {id: SYSCON.PLL0DIV.scale, value: '4', locked: true}
+- {id: SYSCON.PLL0M_MULT.scale, value: '75', locked: true}
+- {id: SYSCON.PLL0N_DIV.scale, value: '4', locked: true}
+- {id: SYSCON.PLL0_PDEC.scale, value: '2', locked: true}
 - {id: SYSCON.SDIOCLKDIV.scale, value: '3'}
 - {id: SYSCON.SDIOCLKSEL.sel, value: SYSCON.MAINCLKSELB}
 sources:
@@ -111,19 +112,19 @@ void BOARD_BootClockRUN(void)
 
     CLOCK_SetupI2SMClkClocking(11289600U);                            /* Enable MCLK_IN clock */
 
-    POWER_SetVoltageForFreq(128000000U);                  /*!< Set voltage for the one of the fastest clock outputs: System clock output */
-    CLOCK_SetFLASHAccessCyclesForFreq(128000000U);          /*!< Set FLASH wait states for core */
+    POWER_SetVoltageForFreq(150000000U);                  /*!< Set voltage for the one of the fastest clock outputs: System clock output */
+    CLOCK_SetFLASHAccessCyclesForFreq(150000000U);          /*!< Set FLASH wait states for core */
 
     /*!< Set up PLL */
     CLOCK_AttachClk(kEXT_CLK_to_PLL0);                    /*!< Switch PLL0CLKSEL to EXT_CLK */
     POWER_DisablePD(kPDRUNCFG_PD_PLL0);                  /* Ensure PLL is on  */
     POWER_DisablePD(kPDRUNCFG_PD_PLL0_SSCG);
     const pll_setup_t pll0Setup = {
-        .pllctrl = SYSCON_PLL0CTRL_CLKEN_MASK | SYSCON_PLL0CTRL_SELI(19U) | SYSCON_PLL0CTRL_SELP(9U),
-        .pllndec = SYSCON_PLL0NDEC_NDIV(1U),
-        .pllpdec = SYSCON_PLL0PDEC_PDIV(2U),
-        .pllsscg = {0x0U,(SYSCON_PLL0SSCG1_MDIV_EXT(32U) | SYSCON_PLL0SSCG1_SEL_EXT_MASK)},
-        .pllRate = 128000000U,
+        .pllctrl = SYSCON_PLL0CTRL_CLKEN_MASK | SYSCON_PLL0CTRL_SELI(39U) | SYSCON_PLL0CTRL_SELP(19U),
+        .pllndec = SYSCON_PLL0NDEC_NDIV(4U),
+        .pllpdec = SYSCON_PLL0PDEC_PDIV(1U),
+        .pllsscg = {0x0U,(SYSCON_PLL0SSCG1_MDIV_EXT(75U) | SYSCON_PLL0SSCG1_SEL_EXT_MASK)},
+        .pllRate = 150000000U,
         .flags =  PLL_SETUPFLAG_WAITLOCK
     };
     CLOCK_SetPLL0Freq(&pll0Setup);                       /*!< Configure PLL0 to the desired values */
@@ -139,7 +140,7 @@ void BOARD_BootClockRUN(void)
     CLOCK_SetClkDiv(kCLOCK_DivSdioClk, 0U, true);               /*!< Reset SDIOCLKDIV divider counter and halt it */
     CLOCK_SetClkDiv(kCLOCK_DivSdioClk, 3U, false);         /*!< Set SDIOCLKDIV divider to value 3 */
     CLOCK_SetClkDiv(kCLOCK_DivPll0Clk, 0U, true);               /*!< Reset PLL0DIV divider counter and halt it */
-    CLOCK_SetClkDiv(kCLOCK_DivPll0Clk, 8U, false);         /*!< Set PLL0DIV divider to value 8 */
+    CLOCK_SetClkDiv(kCLOCK_DivPll0Clk, 4U, false);         /*!< Set PLL0DIV divider to value 4 */
 
     /*!< Set up clock selectors - Attach clocks to the peripheries */
     CLOCK_AttachClk(kPLL0_to_MAIN_CLK);                 /*!< Switch MAIN_CLK to PLL0 */

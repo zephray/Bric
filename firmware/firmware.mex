@@ -176,6 +176,7 @@
                   <pin peripheral="GPIO" signal="PIO1, 2" pin_num="41" pin_signal="PIO1_2/CTIMER0_MAT3/SCT_GPI6/HS_SPI_SCK/USB1_PORTPWRN/PLU_OUT5">
                      <pin_features>
                         <pin_feature name="direction" value="INPUT"/>
+                        <pin_feature name="mode" value="pullUp"/>
                      </pin_features>
                   </pin>
                   <pin peripheral="GPIO" signal="PIO1, 3" pin_num="42" pin_signal="PIO1_3/SCT0_OUT4/HS_SPI_MISO/USB0_PORTPWRN/PLU_OUT6">
@@ -302,14 +303,12 @@
                   <clock_source id="SYSCON.mclk_in.outFreq" value="11.2896 MHz" locked="false" enabled="true"/>
                </clock_sources>
                <clock_outputs>
-                  <clock_output id="CTIMER1_clock.outFreq" value="150 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FXCOM1_clock.outFreq" value="37.5 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FXCOM3_clock.outFreq" value="37.5 MHz" locked="false" accuracy=""/>
+                  <clock_output id="CTIMER1_clock.outFreq" value="100 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM1_clock.outFreq" value="12.5 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM3_clock.outFreq" value="12.5 MHz" locked="false" accuracy=""/>
                   <clock_output id="FXCOM7_clock.outFreq" value="11.2896 MHz" locked="false" accuracy=""/>
-                  <clock_output id="OSC32KHZ_clock.outFreq" value="32.768 kHz" locked="false" accuracy=""/>
-                  <clock_output id="OSTIMER32KHZ_clock.outFreq" value="32.768 kHz" locked="false" accuracy=""/>
-                  <clock_output id="SDIO_clock.outFreq" value="50 MHz" locked="false" accuracy=""/>
-                  <clock_output id="System_clock.outFreq" value="150 MHz" locked="false" accuracy=""/>
+                  <clock_output id="SDIO_clock.outFreq" value="25 MHz" locked="false" accuracy=""/>
+                  <clock_output id="System_clock.outFreq" value="100 MHz" locked="false" accuracy=""/>
                   <clock_output id="USB1_PHY_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
                </clock_outputs>
                <clock_settings>
@@ -319,18 +318,21 @@
                   <setting id="ENABLE_PLL_USB_OUT" value="Enabled" locked="false"/>
                   <setting id="ENABLE_SYSTEM_CLK_OUT" value="Enabled" locked="false"/>
                   <setting id="OSTIMER32K_EN_CFG" value="Enable" locked="false"/>
-                  <setting id="PMC_PDRUNCFG_PDEN_FRO32K_CFG" value="Power_up" locked="false"/>
-                  <setting id="SYSCON.CTIMERCLKSEL1.sel" value="SYSCON.PLL0_BYPASS" locked="false"/>
+                  <setting id="SYSCON.CTIMERCLKSEL1.sel" value="SYSCON.MAINCLKSELB" locked="false"/>
                   <setting id="SYSCON.FCCLKSEL1.sel" value="SYSCON.PLL0DIV" locked="false"/>
                   <setting id="SYSCON.FCCLKSEL3.sel" value="SYSCON.PLL0DIV" locked="false"/>
                   <setting id="SYSCON.FCCLKSEL7.sel" value="SYSCON.mclk_in" locked="false"/>
+                  <setting id="SYSCON.FRGCTRL1_DIV.scale" value="256" locked="true"/>
+                  <setting id="SYSCON.FRGCTRL3_DIV.scale" value="256" locked="true"/>
+                  <setting id="SYSCON.FROHFDIV.scale" value="8" locked="true"/>
+                  <setting id="SYSCON.MAINCLKSELA.sel" value="ANACTRL.fro_hf_clk" locked="false"/>
                   <setting id="SYSCON.MAINCLKSELB.sel" value="SYSCON.PLL0_BYPASS" locked="false"/>
                   <setting id="SYSCON.PLL0CLKSEL.sel" value="SYSCON.CLK_IN_EN" locked="false"/>
-                  <setting id="SYSCON.PLL0DIV.scale" value="4" locked="true"/>
-                  <setting id="SYSCON.PLL0M_MULT.scale" value="75" locked="true"/>
+                  <setting id="SYSCON.PLL0DIV.scale" value="8" locked="true"/>
+                  <setting id="SYSCON.PLL0M_MULT.scale" value="100" locked="true"/>
                   <setting id="SYSCON.PLL0N_DIV.scale" value="4" locked="true"/>
-                  <setting id="SYSCON.PLL0_PDEC.scale" value="2" locked="true"/>
-                  <setting id="SYSCON.SDIOCLKDIV.scale" value="3" locked="false"/>
+                  <setting id="SYSCON.PLL0_PDEC.scale" value="4" locked="true"/>
+                  <setting id="SYSCON.SDIOCLKDIV.scale" value="4" locked="true"/>
                   <setting id="SYSCON.SDIOCLKSEL.sel" value="SYSCON.MAINCLKSELB" locked="false"/>
                </clock_settings>
                <called_from_default_init>true</called_from_default_init>
@@ -346,6 +348,16 @@
       </dcdx>
       <periphs name="Peripherals" version="7.0" enabled="true" update_project_code="true">
          <dependencies>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.ctimer" description="CTimer Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
+               <feature name="enabled" evaluation="equal">
+                  <data type="Boolean">true</data>
+               </feature>
+            </dependency>
+            <dependency resourceType="SWComponent" resourceId="platform.drivers.ctimer" description="Unsupported version of the CTimer Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
+               <feature name="version" evaluation="equivalent">
+                  <data type="Version">2.0.2</data>
+               </feature>
+            </dependency>
             <dependency resourceType="SWComponent" resourceId="platform.drivers.flexcomm_i2c" description="FLEXCOMM I2C Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
                <feature name="enabled" evaluation="equal">
                   <data type="Boolean">true</data>
@@ -366,16 +378,6 @@
                   <data type="Version">2.1.0</data>
                </feature>
             </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.ctimer" description="CTimer Driver not found in the toolchain/IDE project. Project will not compile!" problem_level="2" source="Peripherals">
-               <feature name="enabled" evaluation="equal">
-                  <data type="Boolean">true</data>
-               </feature>
-            </dependency>
-            <dependency resourceType="SWComponent" resourceId="platform.drivers.ctimer" description="Unsupported version of the CTimer Driver in the toolchain/IDE project. Required: ${required_value}, actual: ${actual_value}. Project might not compile correctly." problem_level="1" source="Peripherals">
-               <feature name="version" evaluation="equivalent">
-                  <data type="Version">2.0.2</data>
-               </feature>
-            </dependency>
          </dependencies>
          <generated_project_files>
             <file path="board/peripherals.c" update_enabled="true"/>
@@ -389,6 +391,11 @@
                <description></description>
                <options/>
                <dependencies>
+                  <dependency resourceType="ClockOutput" resourceId="CTIMER1_clock" description="CTIMER1_clock is inactive. Problem must be resolved in another tool." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
+                     <feature name="frequency" evaluation="greaterThan">
+                        <data type="Frequency" unit="Hz">0</data>
+                     </feature>
+                  </dependency>
                   <dependency resourceType="PeripheralUnifiedSignal" resourceId="FLEXCOMM1.i2c_scl" description="Signal I2C serial clock of the peripheral FLEXCOMM1 is not routed. Problem must be resolved in another tool." problem_level="1" source="Peripherals:BOARD_InitPeripherals">
                      <feature name="routed" evaluation="">
                         <data type="Boolean">true</data>
@@ -429,13 +436,28 @@
                         <data type="Frequency" unit="Hz">0</data>
                      </feature>
                   </dependency>
-                  <dependency resourceType="ClockOutput" resourceId="CTIMER1_clock" description="CTIMER1_clock is inactive. Problem must be resolved in another tool." problem_level="2" source="Peripherals:BOARD_InitPeripherals">
-                     <feature name="frequency" evaluation="greaterThan">
-                        <data type="Frequency" unit="Hz">0</data>
-                     </feature>
-                  </dependency>
                </dependencies>
                <instances>
+                  <instance name="CTIMER1" uuid="6ed5c9c5-8142-4328-ba64-ec9e8d5bdfc0" type="ctimer" type_id="ctimer_c8b90232d8b6318ba1dac2cf08fb5f4a" mode="Capture_Match" peripheral="CTIMER1" enabled="true" comment="" custom_name_enabled="false">
+                     <config_set name="fsl_ctimer">
+                        <struct name="ctimerConfig">
+                           <setting name="mode" value="kCTIMER_TimerMode"/>
+                           <setting name="clockSource" value="FunctionClock"/>
+                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
+                           <setting name="timerPrescaler" value="10 kHz"/>
+                        </struct>
+                        <setting name="EnableTimerInInit" value="false"/>
+                        <array name="matchChannels"/>
+                        <struct name="interruptCallbackConfig">
+                           <struct name="interrupt">
+                              <setting name="IRQn" value="CTIMER1_IRQn"/>
+                              <setting name="enable_priority" value="false"/>
+                              <setting name="priority" value="0"/>
+                           </struct>
+                           <setting name="callback" value="kCTIMER_NoCallback"/>
+                        </struct>
+                     </config_set>
+                  </instance>
                   <instance name="FLEXCOMM1" uuid="c022a565-4f32-41e8-a50c-23935c1443c3" type="flexcomm_i2c" type_id="flexcomm_i2c_567d1a9d97c12e5d39b00259c3436dc4" mode="I2C_Polling" peripheral="FLEXCOMM1" enabled="true" comment="" custom_name_enabled="false">
                      <config_set name="fsl_i2c" quick_selection="QS_I2C_Master">
                         <setting name="i2c_mode" value="kI2C_Master"/>
@@ -476,26 +498,6 @@
                         </struct>
                      </config_set>
                   </instance>
-                  <instance name="CTIMER1" uuid="6ed5c9c5-8142-4328-ba64-ec9e8d5bdfc0" type="ctimer" type_id="ctimer_c8b90232d8b6318ba1dac2cf08fb5f4a" mode="Capture_Match" peripheral="CTIMER1" enabled="true" comment="" custom_name_enabled="false">
-                     <config_set name="fsl_ctimer">
-                        <struct name="ctimerConfig">
-                           <setting name="mode" value="kCTIMER_TimerMode"/>
-                           <setting name="clockSource" value="FunctionClock"/>
-                           <setting name="clockSourceFreq" value="BOARD_BootClockRUN"/>
-                           <setting name="timerPrescaler" value="10 kHz"/>
-                        </struct>
-                        <setting name="EnableTimerInInit" value="false"/>
-                        <array name="matchChannels"/>
-                        <struct name="interruptCallbackConfig">
-                           <struct name="interrupt">
-                              <setting name="IRQn" value="CTIMER1_IRQn"/>
-                              <setting name="enable_priority" value="false"/>
-                              <setting name="priority" value="0"/>
-                           </struct>
-                           <setting name="callback" value="kCTIMER_NoCallback"/>
-                        </struct>
-                     </config_set>
-                  </instance>
                   <instance name="OSTIMER" uuid="dcbb1e1a-9d9f-4882-a59a-7926d6b02856" type="ostimer" type_id="ostimer_aa42dff9cf95fde47e92bd2166c38802" mode="general" peripheral="OSTIMER" enabled="false" comment="" custom_name_enabled="false">
                      <config_set name="fsl_ostimer" quick_selection="default">
                         <struct name="clockSettingsOSTIMER">
@@ -522,7 +524,7 @@
             <component name="system" uuid="da979748-3bcb-4eff-be21-ab1dd1aed5cb" type_id="system_54b53072540eeeb8f8e9343e71f28176">
                <config_set_global name="global_system_definitions"/>
             </component>
-            <component name="msg" uuid="4c533ad4-7534-436d-8cdc-de3eb25f18fa" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
+            <component name="msg" uuid="d3fc73db-dafc-4ea8-83b3-6bf1012adf39" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
                <config_set_global name="global_messages"/>
             </component>
          </components>

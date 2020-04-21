@@ -76,7 +76,7 @@ BOARD_InitPins:
     gpio_init_state: 'true'}
   - {pin_num: '40', peripheral: GPIO, signal: 'PIO0, 26', pin_signal: PIO0_26/FC2_RXD_SDA_MOSI_DATA/CLKOUT/CT_INP14/SCT0_OUT5/USB0_IDVALUE/FC0_SCK/HS_SPI_MOSI/SECURE_GPIO0_26,
     direction: OUTPUT}
-  - {pin_num: '41', peripheral: GPIO, signal: 'PIO1, 2', pin_signal: PIO1_2/CTIMER0_MAT3/SCT_GPI6/HS_SPI_SCK/USB1_PORTPWRN/PLU_OUT5, direction: INPUT}
+  - {pin_num: '41', peripheral: GPIO, signal: 'PIO1, 2', pin_signal: PIO1_2/CTIMER0_MAT3/SCT_GPI6/HS_SPI_SCK/USB1_PORTPWRN/PLU_OUT5, direction: INPUT, mode: pullUp}
   - {pin_num: '42', peripheral: GPIO, signal: 'PIO1, 3', pin_signal: PIO1_3/SCT0_OUT4/HS_SPI_MISO/USB0_PORTPWRN/PLU_OUT6, direction: INPUT}
   - {pin_num: '46', peripheral: FLEXCOMM1, signal: RXD_SDA_MOSI_DATA, pin_signal: PIO0_13/FC1_CTS_SDA_SSEL0/UTICK_CAP0/CT_INP0/SCT_GPI0/FC1_RXD_SDA_MOSI_DATA/PLU_IN0/SECURE_GPIO0_13,
     mode: pullUp, ecs: enabled, egp: i2c}
@@ -685,11 +685,16 @@ void BOARD_InitPins(void)
 
     IOCON->PIO[1][2] = ((IOCON->PIO[1][2] &
                          /* Mask bits to zero which are setting */
-                         (~(IOCON_PIO_FUNC_MASK | IOCON_PIO_DIGIMODE_MASK)))
+                         (~(IOCON_PIO_FUNC_MASK | IOCON_PIO_MODE_MASK | IOCON_PIO_DIGIMODE_MASK)))
 
                         /* Selects pin function.
                          * : PORT12 (pin 41) is configured as PIO1_2. */
                         | IOCON_PIO_FUNC(PIO1_2_FUNC_ALT0)
+
+                        /* Selects function mode (on-chip pull-up/pull-down resistor control).
+                         * : Pull-up.
+                         * Pull-up resistor enabled. */
+                        | IOCON_PIO_MODE(PIO1_2_MODE_PULL_UP)
 
                         /* Select Digital mode.
                          * : Enable Digital mode.

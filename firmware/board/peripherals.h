@@ -10,10 +10,10 @@
  * Included files
  **********************************************************************************************************************/
 #include "fsl_common.h"
-#include "fsl_i2c.h"
-#include "fsl_spi.h"
 #include "fsl_ctimer.h"
 #include "fsl_clock.h"
+#include "fsl_i2c.h"
+#include "fsl_spi.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -23,29 +23,29 @@ extern "C" {
  * Definitions
  **********************************************************************************************************************/
 /* Definitions for BOARD_InitPeripherals functional group */
-/* BOARD_InitPeripherals defines for FLEXCOMM1 */
-/* Definition of peripheral ID */
-#define FLEXCOMM1_PERIPHERAL ((I2C_Type *)FLEXCOMM1)
-/* Definition of the clock source frequency */
-#define FLEXCOMM1_CLOCK_SOURCE 37500000UL
-/* BOARD_InitPeripherals defines for FLEXCOMM3 */
-/* Definition of peripheral ID */
-#define FLEXCOMM3_PERIPHERAL ((SPI_Type *)FLEXCOMM3)
-/* Definition of the clock source frequency */
-#define FLEXCOMM3_CLOCK_SOURCE 37500000UL
 /* Definition of peripheral ID */
 #define CTIMER1_PERIPHERAL CTIMER1
 /* Timer tick frequency in Hz (input frequency of the timer) */
 #define CTIMER1_TICK_FREQ 10000UL
 /* Timer tick period in ns (input period of the timer) */
 #define CTIMER1_TICK_PERIOD 100000UL
+/* BOARD_InitPeripherals defines for FLEXCOMM1 */
+/* Definition of peripheral ID */
+#define FLEXCOMM1_PERIPHERAL ((I2C_Type *)FLEXCOMM1)
+/* Definition of the clock source frequency */
+#define FLEXCOMM1_CLOCK_SOURCE 12500000UL
+/* BOARD_InitPeripherals defines for FLEXCOMM3 */
+/* Definition of peripheral ID */
+#define FLEXCOMM3_PERIPHERAL ((SPI_Type *)FLEXCOMM3)
+/* Definition of the clock source frequency */
+#define FLEXCOMM3_CLOCK_SOURCE 12500000UL
 
 /***********************************************************************************************************************
  * Global variables
  **********************************************************************************************************************/
+extern const ctimer_config_t CTIMER1_config;
 extern const i2c_master_config_t FLEXCOMM1_config;
 extern const spi_master_config_t FLEXCOMM3_config;
-extern const ctimer_config_t CTIMER1_config;
 
 /***********************************************************************************************************************
  * Initialization functions

@@ -52,6 +52,8 @@
 #include "minimp3.h"
 #include "decoder.h"
 #include "font.h"
+#include "ltc2942.h"
+#include "pm.h"
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
@@ -63,7 +65,8 @@ static void ui_task(void *pvParameters);
  */
 int main(void) {
   	/* Init board hardware. */
-    BOARD_InitBootPins();
+
+	BOARD_InitBootPins();
     //SDC_InitSdifUnusedDataPin();
     BOARD_InitBootClocks();
     BOARD_InitBootPeripherals();
@@ -123,6 +126,10 @@ uint64_t perf_get_counter() {
 	//return OSTIMER_GetCurrentTimerValue(OSTIMER);
 	//return perf_counter;
 	return CTIMER_GetTimerCountValue(CTIMER1);
+}
+
+void vApplicationIdleHook() {
+	asm("WFI");
 }
 
 static void wav_header(uint8_t *header, uint32_t sampleRate, uint32_t bitsPerFrame, uint32_t fileSize)
@@ -243,6 +250,13 @@ void generatePerfReport()
 
 
 static void ui_task(void *pvParameters) {
+	LTC2942_Init();
+	LTC2942_GetVoltage();
+	LTC2942_GetTemperature();
+	LTC2942_GetCharge();
+
+	pm_init();
+
 	hal_disp_init();
 
 	Canvas *fb = hal_disp_create(256, 128, PIXFMT_Y1);
@@ -292,18 +306,17 @@ static void ui_task(void *pvParameters) {
 			printf("General file : %s.\r\n", fileInformation.fname);
 			if (fileInformation.fname[0] == 'o')
 				continue;
+			if (fileInformation.fname[0] == 'O')
+				continue;
 			font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
 			y += 16;
 			break; // Play the first file for now
 		}
 	}
-
-	/*hal_disp_set(fb, 1, 1, 0);
-	hal_disp_set(fb, 1, 10, 0);
-	hal_disp_set(fb, 10, 1, 0);*/
 	hal_disp_draw(fb, REFRESH_PARTIAL);
 
-	hal_audio_init();
+	/*hal_audio_init();
+	hal_audio_set_volume(0xa0);
 
 	DecoderContext *ctx = NULL;
 	ctx = pvPortMalloc(sizeof(DecoderContext));
@@ -313,6 +326,9 @@ static void ui_task(void *pvParameters) {
 	}
 	dec_openfile(ctx, fileInformation.fname);
 
+	uint32_t charge = LTC2942_GetCharge();
+	uint32_t tick = perf_get_counter();
+
 	// Playback
 	hal_audio_start(44100, AF_S16LE, dec_audio_callback, ctx);
 	dec_play(ctx);
@@ -321,67 +337,32 @@ static void ui_task(void *pvParameters) {
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 
-	// Convert to WAV
-	/*dec_play(ctx);
-
-	FIL outputFile;
-	uint8_t *outputBuf = pvPortMalloc(MAX_FRAME_SIZE);
-	if (!outputBuf) {
-		printf("Unable to create output buffer!\n");
-		vTaskSuspend(NULL);
-	}
-
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-		vTaskSuspend(NULL);
-	}
-	error = f_open(&outputFile, "out.wav", FA_CREATE_ALWAYS | FA_WRITE);
-	if (error != FR_OK) {
-		printf("Unable to create output file!\n");
-		vTaskSuspend(NULL);
-	}
-	error = f_lseek(&outputFile, 44);
-	if (error != FR_OK) {
-		printf("Unable to seek to designated output place!\n");
-		vTaskSuspend(NULL);
-	}
-	xSemaphoreGive(s_fileAccessSemaphore);
-
-	uint32_t bytes;
-	while (!ctx->finished) {
-		uint32_t size = dec_audio_callback(ctx, outputBuf, MAX_FRAME_SIZE);
-		if (size != 0) {
-			xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY);
-			error = f_write(&outputFile, outputBuf, size, &bytes);
-			xSemaphoreGive(s_fileAccessSemaphore);
-			if ((error != FR_OK) || (bytes != size)) {
-				printf("Unable to write to output file!\n");
-				vTaskSuspend(NULL);
-			}
-		}
-		else {
-			printf("Didn't get any data in the last frame!\n");
-		}
-		// Each MP3 frame lasts 26 ms
-		vTaskDelay(pdMS_TO_TICKS(26));
-	}
-
-	uint32_t filesize = f_tell(&outputFile);
-	wav_header(outputBuf, 44100, 16, filesize);
-	xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY);
-	f_lseek(&outputFile, 0);
-	f_write(&outputFile, outputBuf, 44, &bytes);
-	f_close(&outputFile);
-	xSemaphoreGive(s_fileAccessSemaphore);
-
-	vPortFree(outputBuf);
-	*/
+	charge -= LTC2942_GetCharge();
+	tick = perf_get_counter() - tick;
+	uint32_t voltage = LTC2942_GetVoltage();
 
 	generatePerfReport();
 
 	dec_close(ctx);
+	hal_audio_stop();
 
 	vPortFree(ctx);
 
-	vTaskSuspend(NULL);
+	uint32_t power = (uint32_t)(((float)charge * 0.085f) / ((float) tick / 10000.0f / 3600.0f) * ((float)voltage / 1000.0f));
+	char *buf = pvPortMalloc(128);
+	sprintf(buf, "Coulomb Counter: %d LSB", charge);
+	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
+	y+=16;
+	sprintf(buf, "Voltage: %d mV", voltage);
+	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
+	y+=16;
+	sprintf(buf, "Time: %d ms", tick / 10);
+	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
+	y+=16;
+	sprintf(buf, "Power: %d mW", power);
+	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
+	y+=16;
+	hal_disp_draw(fb, REFRESH_PARTIAL);*/
+
+ 	vTaskSuspend(NULL);
 }

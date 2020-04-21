@@ -100,7 +100,7 @@ int I2C_ReadReg(uint8_t addr, uint8_t reg, uint8_t *val) {
 
     status = I2C_RTOS_Transfer(&i2c_rtos_handle, &masterXfer);
     if (status != kStatus_Success) {
-    	printf("I2C master: error during write transaction, %d", status);
+    	printf("I2C master: error during write transaction, %d\n", status);
         return -1;
     }
 
@@ -110,7 +110,7 @@ int I2C_ReadReg(uint8_t addr, uint8_t reg, uint8_t *val) {
 
     status = I2C_RTOS_Transfer(&i2c_rtos_handle, &masterXfer);
     if (status != kStatus_Success) {
-    	printf("I2C master: error during read transaction, %d", status);
+    	printf("I2C master: error during read transaction, %d\n", status);
         return -1;
     }
 
@@ -131,7 +131,7 @@ int I2C_ReadPayload(uint8_t addr, uint8_t *tx_payload, size_t tx_len, uint8_t *r
 
     status = I2C_RTOS_Transfer(&i2c_rtos_handle, &masterXfer);
     if (status != kStatus_Success) {
-    	printf("I2C master: error during write transaction, %d", status);
+    	printf("I2C master: error during write transaction, %d\n", status);
         return -1;
     }
 
@@ -142,7 +142,7 @@ int I2C_ReadPayload(uint8_t addr, uint8_t *tx_payload, size_t tx_len, uint8_t *r
 
     status = I2C_RTOS_Transfer(&i2c_rtos_handle, &masterXfer);
     if (status != kStatus_Success) {
-    	printf("I2C master: error during read transaction, %d", status);
+    	printf("I2C master: error during read transaction, %d\n", status);
         return -1;
     }
 

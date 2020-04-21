@@ -307,11 +307,11 @@
                   <clock_source id="SYSCON.mclk_in.outFreq" value="11.2896 MHz" locked="false" enabled="true"/>
                </clock_sources>
                <clock_outputs>
-                  <clock_output id="FXCOM1_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
-                  <clock_output id="FXCOM3_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM1_clock.outFreq" value="37.5 MHz" locked="false" accuracy=""/>
+                  <clock_output id="FXCOM3_clock.outFreq" value="37.5 MHz" locked="false" accuracy=""/>
                   <clock_output id="FXCOM7_clock.outFreq" value="11.2896 MHz" locked="false" accuracy=""/>
-                  <clock_output id="SDIO_clock.outFreq" value="128/3 MHz" locked="false" accuracy=""/>
-                  <clock_output id="System_clock.outFreq" value="128 MHz" locked="false" accuracy=""/>
+                  <clock_output id="SDIO_clock.outFreq" value="50 MHz" locked="false" accuracy=""/>
+                  <clock_output id="System_clock.outFreq" value="150 MHz" locked="false" accuracy=""/>
                   <clock_output id="USB1_PHY_clock.outFreq" value="16 MHz" locked="false" accuracy=""/>
                </clock_outputs>
                <clock_settings>
@@ -327,9 +327,10 @@
                   <setting id="SYSCON.MAINCLKSELA.sel" value="ANACTRL.fro_hf_clk" locked="false"/>
                   <setting id="SYSCON.MAINCLKSELB.sel" value="SYSCON.PLL0_BYPASS" locked="false"/>
                   <setting id="SYSCON.PLL0CLKSEL.sel" value="SYSCON.CLK_IN_EN" locked="false"/>
-                  <setting id="SYSCON.PLL0DIV.scale" value="8" locked="true"/>
-                  <setting id="SYSCON.PLL0M_MULT.scale" value="32" locked="false"/>
-                  <setting id="SYSCON.PLL0_PDEC.scale" value="4" locked="true"/>
+                  <setting id="SYSCON.PLL0DIV.scale" value="4" locked="true"/>
+                  <setting id="SYSCON.PLL0M_MULT.scale" value="75" locked="true"/>
+                  <setting id="SYSCON.PLL0N_DIV.scale" value="4" locked="true"/>
+                  <setting id="SYSCON.PLL0_PDEC.scale" value="2" locked="true"/>
                   <setting id="SYSCON.SDIOCLKDIV.scale" value="3" locked="false"/>
                   <setting id="SYSCON.SDIOCLKSEL.sel" value="SYSCON.MAINCLKSELB" locked="false"/>
                </clock_settings>
@@ -509,7 +510,7 @@
             <component name="system" uuid="fbf6e776-1a54-40f8-9be8-90813cc16651" type_id="system_54b53072540eeeb8f8e9343e71f28176">
                <config_set_global name="global_system_definitions"/>
             </component>
-            <component name="msg" uuid="56dda19f-5fc4-4b27-9290-0ba41b8d5062" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
+            <component name="msg" uuid="1dbd0dcb-537f-4c56-a49e-d83083af25d6" type_id="msg_6e2baaf3b97dbeef01c0043275f9a0e7">
                <config_set_global name="global_messages"/>
             </component>
          </components>

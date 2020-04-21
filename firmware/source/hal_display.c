@@ -93,7 +93,7 @@ void hal_disp_set(
     uint8_t mask;
     size_t offset;
 
-    if ((x >= dst->width) && (y >= dst->height))
+    if ((x >= dst->width) || (y >= dst->height))
     	return;
 
     switch(dst->pixelFormat) {

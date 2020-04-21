@@ -42,6 +42,47 @@ component:
  * BOARD_InitPeripherals functional group
  **********************************************************************************************************************/
 /***********************************************************************************************************************
+ * CTIMER1 initialization code
+ **********************************************************************************************************************/
+/* clang-format off */
+/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+instance:
+- name: 'CTIMER1'
+- type: 'ctimer'
+- mode: 'Capture_Match'
+- custom_name_enabled: 'false'
+- type_id: 'ctimer_c8b90232d8b6318ba1dac2cf08fb5f4a'
+- functional_group: 'BOARD_InitPeripherals'
+- peripheral: 'CTIMER1'
+- config_sets:
+  - fsl_ctimer:
+    - ctimerConfig:
+      - mode: 'kCTIMER_TimerMode'
+      - clockSource: 'FunctionClock'
+      - clockSourceFreq: 'BOARD_BootClockRUN'
+      - timerPrescaler: '10 kHz'
+    - EnableTimerInInit: 'false'
+    - matchChannels: []
+    - interruptCallbackConfig:
+      - interrupt:
+        - IRQn: 'CTIMER1_IRQn'
+        - enable_priority: 'false'
+        - priority: '0'
+      - callback: 'kCTIMER_NoCallback'
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
+/* clang-format on */
+const ctimer_config_t CTIMER1_config = {
+  .mode = kCTIMER_TimerMode,
+  .input = kCTIMER_Capture_0,
+  .prescale = 9999
+};
+
+void CTIMER1_init(void) {
+  /* CTIMER1 peripheral initialization */
+  CTIMER_Init(CTIMER1_PERIPHERAL, &CTIMER1_config);
+}
+
+/***********************************************************************************************************************
  * FLEXCOMM1 initialization code
  **********************************************************************************************************************/
 /* clang-format off */
@@ -143,55 +184,14 @@ void FLEXCOMM3_init(void) {
 }
 
 /***********************************************************************************************************************
- * CTIMER1 initialization code
- **********************************************************************************************************************/
-/* clang-format off */
-/* TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
-instance:
-- name: 'CTIMER1'
-- type: 'ctimer'
-- mode: 'Capture_Match'
-- custom_name_enabled: 'false'
-- type_id: 'ctimer_c8b90232d8b6318ba1dac2cf08fb5f4a'
-- functional_group: 'BOARD_InitPeripherals'
-- peripheral: 'CTIMER1'
-- config_sets:
-  - fsl_ctimer:
-    - ctimerConfig:
-      - mode: 'kCTIMER_TimerMode'
-      - clockSource: 'FunctionClock'
-      - clockSourceFreq: 'BOARD_BootClockRUN'
-      - timerPrescaler: '10 kHz'
-    - EnableTimerInInit: 'false'
-    - matchChannels: []
-    - interruptCallbackConfig:
-      - interrupt:
-        - IRQn: 'CTIMER1_IRQn'
-        - enable_priority: 'false'
-        - priority: '0'
-      - callback: 'kCTIMER_NoCallback'
- * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
-/* clang-format on */
-const ctimer_config_t CTIMER1_config = {
-  .mode = kCTIMER_TimerMode,
-  .input = kCTIMER_Capture_0,
-  .prescale = 14999
-};
-
-void CTIMER1_init(void) {
-  /* CTIMER1 peripheral initialization */
-  CTIMER_Init(CTIMER1_PERIPHERAL, &CTIMER1_config);
-}
-
-/***********************************************************************************************************************
  * Initialization functions
  **********************************************************************************************************************/
 void BOARD_InitPeripherals(void)
 {
   /* Initialize components */
+  CTIMER1_init();
   FLEXCOMM1_init();
   FLEXCOMM3_init();
-  CTIMER1_init();
 }
 
 /***********************************************************************************************************************
