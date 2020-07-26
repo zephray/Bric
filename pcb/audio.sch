@@ -905,7 +905,7 @@ F 1 "100nF" H 1615 5105 50  0000 L CNN
 F 2 "Capacitor_SMD:C_0402_1005Metric" H 1538 5000 50  0001 C CNN
 F 3 "~" H 1500 5150 50  0001 C CNN
 	1    1500 5150
-	1    0    0    -1  
+	1    0    0    1   
 $EndComp
 Connection ~ 1500 5000
 $Comp
@@ -1236,4 +1236,33 @@ Wire Wire Line
 	1800 3800 2000 3800
 Wire Wire Line
 	1800 3300 1800 3800
+$Comp
+L power:GND #PWR?
+U 1 1 5F264DFE
+P 9300 3700
+AR Path="/5D4C99F9/5F264DFE" Ref="#PWR?"  Part="1" 
+AR Path="/5D438133/5F264DFE" Ref="#PWR0106"  Part="1" 
+F 0 "#PWR0106" H 9300 3450 50  0001 C CNN
+F 1 "GND" H 9305 3527 50  0000 C CNN
+F 2 "" H 9300 3700 50  0001 C CNN
+F 3 "" H 9300 3700 50  0001 C CNN
+	1    9300 3700
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C C?
+U 1 1 5F264E04
+P 9300 3550
+AR Path="/5D4C99F9/5F264E04" Ref="C?"  Part="1" 
+AR Path="/5D438133/5F264E04" Ref="C426"  Part="1" 
+F 0 "C426" H 9415 3596 50  0000 L CNN
+F 1 "47uF" H 9415 3505 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 9338 3400 50  0001 C CNN
+F 3 "~" H 9300 3550 50  0001 C CNN
+	1    9300 3550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9300 3400 8900 3400
+Connection ~ 8900 3400
 $EndSCHEMATC

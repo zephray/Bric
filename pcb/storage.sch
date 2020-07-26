@@ -130,56 +130,6 @@ $EndComp
 Wire Wire Line
 	8000 3000 7600 3000
 Connection ~ 7600 3000
-$Comp
-L power:+3V3 #PWR0203
-U 1 1 5D1E3230
-P 5900 1800
-F 0 "#PWR0203" H 5900 1650 50  0001 C CNN
-F 1 "+3V3" H 5915 1973 50  0000 C CNN
-F 2 "" H 5900 1800 50  0001 C CNN
-F 3 "" H 5900 1800 50  0001 C CNN
-	1    5900 1800
-	1    0    0    -1  
-$EndComp
-$Comp
-L Transistor_FET:IRLML6402 Q300
-U 1 1 5D1E5978
-P 5800 2100
-F 0 "Q300" H 6006 2054 50  0000 L CNN
-F 1 "PMV48XP" H 6006 2145 50  0000 L CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 6000 2025 50  0001 L CIN
-F 3 "https://www.infineon.com/dgdl/irlml6402pbf.pdf?fileId=5546d462533600a401535668d5c2263c" H 5800 2100 50  0001 L CNN
-	1    5800 2100
-	1    0    0    1   
-$EndComp
-Wire Wire Line
-	5900 1800 5900 1900
-$Comp
-L Device:R R304
-U 1 1 5D1FF47A
-P 5450 1950
-F 0 "R304" H 5520 1996 50  0000 L CNN
-F 1 "100K" H 5520 1905 50  0000 L CNN
-F 2 "Resistor_SMD:R_0603_1608Metric" V 5380 1950 50  0001 C CNN
-F 3 "~" H 5450 1950 50  0001 C CNN
-	1    5450 1950
-	1    0    0    -1  
-$EndComp
-Text GLabel 4700 3200 0    50   Input ~ 0
-SD0_PWR_EN
-Wire Wire Line
-	5900 2300 5900 2700
-$Comp
-L power:+3V3 #PWR0205
-U 1 1 5D20B20B
-P 5450 1800
-F 0 "#PWR0205" H 5450 1650 50  0001 C CNN
-F 1 "+3V3" H 5465 1973 50  0000 C CNN
-F 2 "" H 5450 1800 50  0001 C CNN
-F 3 "" H 5450 1800 50  0001 C CNN
-	1    5450 1800
-	1    0    0    -1  
-$EndComp
 Text Notes 7800 3100 0    50   ~ 0
 47uF is required to comply with SD 3.0 spec
 Text GLabel 4700 3700 0    50   Input ~ 0
@@ -207,8 +157,6 @@ F 3 "" H 7000 2600 50  0001 C CNN
 	1    7000 2600
 	1    0    0    -1  
 $EndComp
-Text Label 5000 3200 0    50   ~ 0
-SD_PWR_EN
 Text Label 5000 3700 0    50   ~ 0
 SD_CLK
 Text Label 5000 3400 0    50   ~ 0
@@ -228,40 +176,9 @@ Wire Wire Line
 	7000 3100 7000 4100
 Wire Wire Line
 	4700 3900 5600 3900
-$Comp
-L Transistor_FET:BSS138 Q301
-U 1 1 5E8D0007
-P 5350 2300
-F 0 "Q301" H 5554 2346 50  0000 L CNN
-F 1 "BSS138" H 5554 2255 50  0000 L CNN
-F 2 "Package_TO_SOT_SMD:SOT-23" H 5550 2225 50  0001 L CIN
-F 3 "https://www.fairchildsemi.com/datasheets/BS/BSS138.pdf" H 5350 2300 50  0001 L CNN
-	1    5350 2300
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	5600 2100 5450 2100
-Connection ~ 5450 2100
-Wire Wire Line
-	4700 3200 5100 3200
-$Comp
-L power:GND #PWR0106
-U 1 1 5E8F5B98
-P 5450 2500
-F 0 "#PWR0106" H 5450 2250 50  0001 C CNN
-F 1 "GND" H 5455 2327 50  0000 C CNN
-F 2 "" H 5450 2500 50  0001 C CNN
-F 3 "" H 5450 2500 50  0001 C CNN
-	1    5450 2500
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7000 2600 7000 2800
 Connection ~ 7600 2700
 Wire Wire Line
 	7600 2700 8000 2700
-Wire Wire Line
-	7300 2600 7300 2700
 $Comp
 L Device:R R307
 U 1 1 5E903122
@@ -318,10 +235,6 @@ Wire Wire Line
 Wire Wire Line
 	5900 2800 5900 2700
 Connection ~ 5900 2700
-Wire Wire Line
-	5150 2300 5100 2300
-Wire Wire Line
-	5100 2300 5100 3200
 Wire Wire Line
 	6200 2800 6200 2700
 Connection ~ 6200 2700
@@ -383,24 +296,20 @@ Wire Wire Line
 Connection ~ 7000 4100
 Wire Wire Line
 	7000 4100 7400 4100
-$Comp
-L symbols:+VSD #PWR0118
-U 1 1 5E923782
-P 7300 2600
-F 0 "#PWR0118" H 7300 2450 50  0001 C CNN
-F 1 "+VSD" H 7315 2773 50  0000 C CNN
-F 2 "" H 7300 2600 50  0001 C CNN
-F 3 "" H 7300 2600 50  0001 C CNN
-	1    7300 2600
-	1    0    0    -1  
-$EndComp
 Connection ~ 7300 2700
 Wire Wire Line
 	7300 2700 7600 2700
 Wire Wire Line
-	6500 2700 7300 2700
+	6500 2700 7000 2700
 Wire Wire Line
 	7300 2700 7300 3500
 Wire Wire Line
 	7300 3500 7400 3500
+Wire Wire Line
+	7000 2600 7000 2700
+Connection ~ 7000 2700
+Wire Wire Line
+	7000 2700 7300 2700
+Wire Wire Line
+	7000 2800 7000 2700
 $EndSCHEMATC

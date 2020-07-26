@@ -486,4 +486,9 @@ Text Label 7400 5000 0    50   ~ 0
 PREVGL
 Wire Wire Line
 	7000 4500 7000 4700
+Text Label 4300 4000 0    50   ~ 0
+RESE
+Wire Wire Line
+	4200 4000 4800 4000
+Connection ~ 4200 4000
 $EndSCHEMATC
