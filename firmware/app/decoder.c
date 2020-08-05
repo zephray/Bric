@@ -18,7 +18,7 @@
 #include "arm_math.h"
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
-#include "decoder.h"
+#include "../../app/decoder.h"
 
 static int16_t pcm_buffer[MAX_FRAME_SIZE];
 // 0: waiting for DMA CB, 1: waiting for decoder

@@ -10,9 +10,9 @@
 #ifndef id3v2lib_header_h
 #define id3v2lib_header_h
 
-#include "types.h"
-#include "constants.h"
-#include "utils.h"
+#include "../../../app/id3v2lib/constants.h"
+#include "../../../app/id3v2lib/types.h"
+#include "../../../app/id3v2lib/utils.h"
 
 int has_id3v2tag(ID3v2_header* tag_header);
 int _has_id3v2tag(char* raw_header);

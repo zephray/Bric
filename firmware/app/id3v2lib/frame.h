@@ -10,8 +10,8 @@
 #ifndef id3v2lib_frame_h
 #define id3v2lib_frame_h
 
-#include "types.h"
-#include "constants.h"
+#include "../../../app/id3v2lib/constants.h"
+#include "../../../app/id3v2lib/types.h"
 
 ID3v2_frame* parse_frame(char* bytes, int offset, int version);
 int get_frame_type(char* frame_id);

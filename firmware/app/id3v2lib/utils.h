@@ -10,7 +10,7 @@
 #ifndef id3v2lib_utils_h
 #define id3v2lib_utils_h
 
-#include "types.h"
+#include "../../../app/id3v2lib/types.h"
 
 unsigned int btoi(char* bytes, int size, int offset);
 char* itob(int integer);
