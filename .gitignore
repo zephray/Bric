@@ -25,6 +25,10 @@ impact*
 Debug/
 Release/
 
+.vscode/
+
+*.mp3
+
 *.zip
 
 *.map
