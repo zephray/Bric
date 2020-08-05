@@ -12,16 +12,17 @@
 #include "timers.h"
 #include "semphr.h"
 #include <stdio.h>
-#include "ff.h"
+#include <stdbool.h>
+#include "platform.h"
+#include "hal_filesystem.h"
 #include "hal_display.h"
 #include "hal_audio.h"
+#include "minimp3.h"
 #include "decoder.h"
 #include "font.h"
 #include "app.h"
 
 void startup_task(void *pvParameters) {
-	pm_init();
-
 	hal_disp_init();
 
 	Canvas *fb = hal_disp_create(256, 128, PIXFMT_Y1);
@@ -30,31 +31,22 @@ void startup_task(void *pvParameters) {
 	font_init();
 	//font_disp(fb, 0, 0, 0, "Hello World", 12, CE_ASCII);
 
-	FRESULT error;
-	DIR directory; /* Directory object */
-	FILINFO fileInformation;
+	Directory *directory; /* Directory object */
+	FileInfo fileInformation;
 	int y = 0;
 
 	printf("\r\nList the file in that directory......\r\n");
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
-	if (f_opendir(&directory, "/"))
+	directory = hal_fs_opendir(APP_ROOT);
+	if (directory == NULL)
 	{
 		printf("Open directory failed.\r\n");
 		vTaskSuspend(NULL);
 	}
-	xSemaphoreGive(s_fileAccessSemaphore);
-
 	for (;;)
 	{
-		if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-			printf("Unable to obtain lock to access filesystem.\n");
-		}
-		error = f_readdir(&directory, &fileInformation);
-		xSemaphoreGive(s_fileAccessSemaphore);
+		int result = hal_fs_readdir(directory, &fileInformation);
 
-		if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
+		if ((result < 0) || (fileInformation.fname[0U] == 0U))
 		{
 		   break;
 		}
@@ -62,7 +54,7 @@ void startup_task(void *pvParameters) {
 		{
 		   continue;
 		}
-		if (fileInformation.fattrib & AM_DIR)
+		if (fileInformation.type == FT_DIRECTORY)
 		{
 			printf("Directory file : %s.\r\n", fileInformation.fname);
 		}
@@ -75,7 +67,7 @@ void startup_task(void *pvParameters) {
 				continue;
 			font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
 			y += 16;
-			break; // Play the first file for now
+			//break; // Play the first file for now
 		}
 	}
 	hal_disp_draw(fb, REFRESH_PARTIAL);

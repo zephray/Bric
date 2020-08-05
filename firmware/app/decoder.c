@@ -13,12 +13,10 @@
 #include "task.h"
 #include "semphr.h"
 #include "queue.h"
-#include "ff.h"
-#include "sdcard.h"
-#include "arm_math.h"
+#include "hal_filesystem.h"
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
-#include "../../app/decoder.h"
+#include "decoder.h"
 
 static int16_t pcm_buffer[MAX_FRAME_SIZE];
 // 0: waiting for DMA CB, 1: waiting for decoder
@@ -38,17 +36,13 @@ void dec_fetch_thread(void *arg) {
 
     while (ctx->offset < ctx->file_size) {
         uint32_t bytes;
-        if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-			printf("Unable to obtain lock to access filesystem.\n");
-		}
-        if (f_read(&(ctx->file), buf, QUEUE_OBJECT, &bytes) != FR_OK) {
-        	printf("Error reading compressed audio file.\n");
-        }
-        xSemaphoreGive(s_fileAccessSemaphore);
+        bytes = hal_fs_read(ctx->file, buf, QUEUE_OBJECT); // Could be -1
+        if (bytes < 0)
+            break;
         if (bytes < QUEUE_OBJECT)
             memset(buf + bytes, 0, QUEUE_OBJECT - bytes);
         xQueueSendToBack(ctx->input_queue, buf, portMAX_DELAY);
-        ctx->offset = f_tell(&(ctx->file));
+        ctx->offset = hal_fs_tell(ctx->file);
     }
 
 	vPortFree(buf);
@@ -102,7 +96,7 @@ void dec_decode_thread(void *arg) {
 }
 
 // Return actual sample size filled
-size_t dec_audio_callback(void *userdata, uint8_t *stream, int len) {
+size_t dec_audio_callback(void *userdata, uint8_t *stream, uint32_t len) {
     DecoderContext *ctx = (DecoderContext *)userdata;
 
     if (!(ctx->playing)) {
@@ -145,15 +139,12 @@ int dec_openfile(DecoderContext *ctx, char *fname) {
     pcm_buffer_sem = xSemaphoreCreateBinary();
 
     // Open file
-    if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-    	printf("Unable to obtain lock to access filesystem.\n");
-    }
-    if (f_open(&(ctx->file), fname, FA_READ) != FR_OK) {
+    ctx->file = hal_fs_open(fname, OM_READ);
+    if (ctx->file == NULL) {
     	printf("Unable to open audio file.\n");
     	return -1;
     }
-    ctx->file_size = f_size(&(ctx->file));
-    xSemaphoreGive(s_fileAccessSemaphore);
+    ctx->file_size = hal_fs_size(ctx->file);
 
     // Setup queues
     ctx->input_queue = xQueueCreate(QUEUE_LENGTH, QUEUE_OBJECT);
@@ -202,7 +193,7 @@ int dec_pause(DecoderContext *ctx) {
 int dec_close(DecoderContext *ctx) {
     vTaskDelete(ctx->fetch_handle);
     vTaskDelete(ctx->decode_handle);
-    // Free the semaphore here
-    f_close(&(ctx->file));
+    vSemaphoreDelete(pcm_buffer_sem);
+    hal_fs_close(ctx->file);
     return 0;
 }

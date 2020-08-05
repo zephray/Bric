@@ -7,7 +7,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 #include <stdio.h>
-#include "ff.h"
+#include "hal_filesystem.h"
 #include "tjpgd.h"
 #include "tags.h"
 

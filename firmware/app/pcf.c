@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "FreeRTOS.h"
-#include "ff.h"
+#include "hal_filesystem.h"
 #include "pcf.h"
 
 #define PCF_PROPERTIES          (1<<0)
@@ -66,27 +66,21 @@ uint16_t u16_1(uint8_t * buf) {
 	return result;
 }
 
-uint32_t bread32(uint32_t (*r)(), FIL * f) {
-	uint32_t bytes;
-	if (f_read(f, bread, 4, &bytes) != FR_OK) {
-		return 0;
-	}
+uint32_t bread32(uint32_t (*r)(), File * f) {
+	hal_fs_read(f, bread, 4);
 	return r(bread);
 }
 
-uint32_t bread16(uint16_t (*r)(), FIL * f) {
-	uint32_t bytes;
-	if (f_read(f, bread, 2, &bytes) != FR_OK) {
-		return 0;
-	}
+uint32_t bread16(uint16_t (*r)(), File * f) {
+	hal_fs_read(f, bread, 2);
 	return r(bread);
 }
 
-void pcf_encoding_load(encoding_table * t, FIL * f) {
+void pcf_encoding_load(encoding_table * t, File * f) {
 #if (PCF_DEBUG)
 	printf("%s offset: %d\n", __FUNCTION__, t->table->offset);
 #endif
-	if (f_lseek(f, t->table->offset) != FR_OK) { return; }
+	if (hal_fs_seek(f, t->table->offset) < 0) { return; }
 	t->format = bread32_0(f);
 #if (PCF_DEBUG)
 	printf("%s format: %04X %04X\n", __FUNCTION__, t->format, t->table->format);
@@ -111,12 +105,12 @@ void pcf_encoding_load(encoding_table * t, FIL * f) {
 #endif
 }
 
-uint16_t pcf_encoding_index(encoding_table * t, FIL * f, uint32_t i) {
-	if (f_lseek(f, t->table->offset + 14 + i * 2) != FR_OK) { return 0; }
+uint16_t pcf_encoding_index(encoding_table * t, File * f, uint32_t i) {
+	if (hal_fs_seek(f, t->table->offset + 14 + i * 2) < 0) { return 0; }
 	return bread16_1(f);
 }
 
-uint32_t pcf_encoding_find(encoding_table * t, FIL * f, uint32_t r) {
+uint32_t pcf_encoding_find(encoding_table * t, File * f, uint32_t r) {
 	if (t->direct) {
 #if (PCF_DEBUG)
 		printf("%s direct\n", __FUNCTION__);
@@ -139,11 +133,11 @@ uint32_t pcf_encoding_find(encoding_table * t, FIL * f, uint32_t r) {
 	return pcf_encoding_index(t, f, off);
 }
 
-void pcf_metric_load(metric_table * t, FIL * f) {
+void pcf_metric_load(metric_table * t, File * f) {
 #if (PCF_DEBUG)
 	printf("%s offset: %d\n", __FUNCTION__, t->table->offset);
 #endif
-	if (f_lseek(f, t->table->offset) != FR_OK) { return; }
+	if (hal_fs_seek(f, t->table->offset) < 0) { return; }
 	t->format = bread32_0(f);
 #if (PCF_DEBUG)
 	printf("%s format: %04X %04X\n", __FUNCTION__, t->format, t->table->format);
@@ -163,16 +157,15 @@ void pcf_metric_load(metric_table * t, FIL * f) {
 	}
 }
 
-void pcf_metric_find(metric_table * t, FIL * f, uint32_t i, metric_entry * me) {
+void pcf_metric_find(metric_table * t, File * f, uint32_t i, metric_entry * me) {
 #if (PCF_DEBUG)
 	printf("%s i: %d, count: %d\n", __FUNCTION__, i, t->count);
 #endif
 	if (i > t->count) { return; }
 	if (t->table->format & PCF_COMPRESSED_METRICS) {
-		if (f_lseek(f, (uint64_t)t->table->offset + 6 + (uint64_t)i * 5) != FR_OK) { return; }
+		if (hal_fs_seek(f, (uint64_t)t->table->offset + 6 + (uint64_t)i * 5) < 0) { return; }
 		uint8_t b[5];
-		uint32_t bytes;
-		f_read(f, b, sizeof(b), &bytes);
+		hal_fs_read(f, b, sizeof(b));
 		me->left_sided_bearing = b[0];
 		me->left_sided_bearing -= 0x80;
 		me->right_side_bearing = b[1];
@@ -184,10 +177,9 @@ void pcf_metric_find(metric_table * t, FIL * f, uint32_t i, metric_entry * me) {
 		me->character_descent = b[4];
 		me->character_descent -= 0x80;
 	} else {
-		if (f_lseek(f, (uint64_t)t->table->offset + 8 + (uint64_t)i * 12) != FR_OK) { return; }
+		if (hal_fs_seek(f, (uint64_t)t->table->offset + 8 + (uint64_t)i * 12) < 0) { return; }
 		uint16_t b[6];
-		uint32_t bytes;
-		f_read(f, b, sizeof(b) * 2, &bytes);
+		hal_fs_read(f, b, sizeof(b) * 2);
 		me->left_sided_bearing = b[0];
 		me->right_side_bearing = b[1];
 		me->character_width = b[2];
@@ -197,11 +189,11 @@ void pcf_metric_find(metric_table * t, FIL * f, uint32_t i, metric_entry * me) {
 	}
 }
 
-void pcf_bitmap_load(bitmap_table * t, FIL * f) {
+void pcf_bitmap_load(bitmap_table * t, File * f) {
 #if (PCF_DEBUG)
 	printf("%s offset: %d\n", __FUNCTION__, t->table->offset);
 #endif
-	if (f_lseek(f, t->table->offset) != FR_OK) { return; }
+	if (hal_fs_seek(f, t->table->offset) < 0) { return; }
 	t->format = bread32_0(f);
 #if (PCF_DEBUG)
 	printf("%s format: %04X %04X\n", __FUNCTION__, t->format, t->table->format);
@@ -220,23 +212,22 @@ void pcf_bitmap_load(bitmap_table * t, FIL * f) {
 #endif
 }
 
-uint32_t pcf_bitmap_offset(bitmap_table * t, FIL * f, uint32_t i) {
-	if (f_lseek(f, t->table->offset + 8 + i * 4) != FR_OK) { return 0; }
+uint32_t pcf_bitmap_offset(bitmap_table * t, File * f, uint32_t i) {
+	if (hal_fs_seek(f, t->table->offset + 8 + i * 4) < 0) { return 0; }
 	return bread32_1(f);
 }
 
-void pcf_bitmap_find(bitmap_table * t, FIL * f, uint32_t i, bitmap * b) {
+void pcf_bitmap_find(bitmap_table * t, File * f, uint32_t i, bitmap * b) {
 	if (i + 1 > t->count) { return; }
 	uint64_t off = (uint64_t)t->table->offset + (uint64_t)(8 + 4 * t->count + 16);
 	uint32_t offset_i = pcf_bitmap_offset(t, f, i);
 	off += (uint64_t)offset_i;
 	uint32_t size = pcf_bitmap_offset(t, f, i + 1) - pcf_bitmap_offset(t, f, i);
 	if (size < 0) { return; }
-	if (f_lseek(f, off) != FR_OK) { return; }
+	if (hal_fs_seek(f, off) < 0) { return; }
 	uint8_t * data = b->data = pvPortMalloc(size);
 	b->length = size;
-	uint32_t bytes;
-	f_read(f, data, size, &bytes);
+	hal_fs_read(f, data, size);
 }
 
 void pcf_bitmap_free(bitmap * b) {
@@ -248,11 +239,10 @@ void pcf_bitmap_free(bitmap * b) {
 
 void pcf_open(pf * pf, char * path) {
 	if (pf->init) { return; }
-	FRESULT result = f_open(&(pf->f), path, FA_READ);
-	if (result != FR_OK) { fprintf(stderr, "Failed to open the file.\n"); return; }
+	pf->f = hal_fs_open(path, OM_READ);
+	if (pf->f == NULL) { fprintf(stderr, "Failed to open the font.\n"); return; }
 	file_header fh;
-	uint32_t bytes;
-	f_read(&(pf->f), &fh, sizeof(fh), &bytes);
+	hal_fs_read(pf->f, &fh, sizeof(fh));
 #if (PCF_DEBUG)
 	printf("%02X%02X%02X%02X\n", fh.header[0], fh.header[1], fh.header[2], fh.header[3]);
 	printf("tableCount: %d\n", fh.table_count);
@@ -260,7 +250,7 @@ void pcf_open(pf * pf, char * path) {
 	toc_entry * toc_metrics, * toc_bitmaps, * toc_encoding;
 	for (int i = 0; i < fh.table_count; i++) {
 		toc_entry * toc = pvPortMalloc(sizeof(toc_entry)); // minor memory leak
-		f_read(&(pf->f), toc, sizeof(toc_entry), &bytes);
+		hal_fs_read(pf->f, toc, sizeof(toc_entry));
 //		printf("toc->type:%d\n", toc->type);
 		switch (toc->type) {
 		case PCF_METRICS:
@@ -279,19 +269,19 @@ void pcf_open(pf * pf, char * path) {
 	}
 	metric_table * mt = pf->metric = pvPortMalloc(sizeof(metric_table));
 	mt->table = toc_metrics;
-	pcf_metric_load(mt, &(pf->f));
+	pcf_metric_load(mt, pf->f);
 #if (PCF_DEBUG)
 	printf("metrics: %d\n", mt->count);
 #endif
 	bitmap_table * bt = pf->bitmap = pvPortMalloc(sizeof(bitmap_table));
 	bt->table = toc_bitmaps;
-	pcf_bitmap_load(bt, &(pf->f));
+	pcf_bitmap_load(bt, pf->f);
 #if (PCF_DEBUG)
 	printf("bitmaps: %d\n", bt->count);
 #endif
 	encoding_table * et = pf->encoding = pvPortMalloc(sizeof(encoding_table));
 	et->table = toc_encoding;
-	pcf_encoding_load(et, &(pf->f));
+	pcf_encoding_load(et, pf->f);
 	pf->init = 1;
 }
 
@@ -300,8 +290,8 @@ void pcf_free(pf * pf) {
 }
 
 void pcf_lookup(pf * pf, uint32_t r, bitmap * b, metric_entry * me) {
-	uint32_t i = pcf_encoding_find(pf->encoding, &(pf->f), r);
-	pcf_metric_find(pf->metric, &(pf->f), i, me);
-	pcf_bitmap_find(pf->bitmap, &(pf->f), i, b);
+	uint32_t i = pcf_encoding_find(pf->encoding, pf->f, r);
+	pcf_metric_find(pf->metric, pf->f, i, me);
+	pcf_bitmap_find(pf->bitmap, pf->f, i, b);
 //	*stride = 4;
 }

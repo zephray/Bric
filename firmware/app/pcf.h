@@ -64,8 +64,8 @@ typedef struct encodingTable {
 typedef struct pf {
 	encoding_table * encoding;
 	bitmap_table * bitmap;
-	metric_table *metric;
-	FIL f;
+	metric_table * metric;
+	File * f;
 	uint8_t init;
 } pf;
 

@@ -62,9 +62,12 @@ int main(void) {
   	/* Init board hardware. */
 
 	BOARD_InitBootPins();
-    //SDC_InitSdifUnusedDataPin();
-    BOARD_InitBootClocks();
-    BOARD_InitBootPeripherals();
+   //SDC_InitSdifUnusedDataPin();
+   BOARD_InitBootClocks();
+   BOARD_InitBootPeripherals();
+
+   pm_init();
+
 
     /*if (pdPASS != xTaskCreate(SDC_Test, "SDCTestTask", 1024U, NULL,	(configMAX_PRIORITIES - 2U), NULL))
 	{

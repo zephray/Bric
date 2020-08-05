@@ -29,7 +29,7 @@ typedef struct {
     // Decoder handle
     mp3dec_t mp3d;
     // Input file
-    FIL file;
+    File * file;
     size_t file_size;
     // For communication between fetch and decode
     QueueHandle_t input_queue; // allocated dynamically
@@ -49,7 +49,7 @@ typedef struct {
 
 int dec_openfile(DecoderContext *ctx, char *fname);
 void dec_decode(DecoderContext *ctx, uint8_t *buf, int bytes);
-size_t dec_audio_callback(void *userdata, uint8_t *stream, int len);
+size_t dec_audio_callback(void *userdata, uint8_t *stream, uint32_t len);
 int dec_play(DecoderContext *ctx);
 int dec_pause(DecoderContext *ctx);
 int dec_close(DecoderContext *ctx);

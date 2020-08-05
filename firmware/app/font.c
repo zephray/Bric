@@ -9,31 +9,23 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include <stdio.h>
-#include "ff.h"
+#include "platform.h"
+#include "hal_filesystem.h"
 #include "hal_display.h"
 #include "font.h"
 #include "pcf.h"
-#include "sdcard.h"
-
-#define PCF_FONT_PATH "assets/unifont.pcf"
 
 static pf font_pf;
 
 void font_init() {
     font_pf.init = 0;
-    if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) == pdTRUE) {
-    	pcf_open(&font_pf, PCF_FONT_PATH);
-    	xSemaphoreGive(s_fileAccessSemaphore);
-    }
+    pcf_open(&font_pf, PCF_FONT_PATH);
 }
 
 void font_draw(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h) {
 	bitmap b;
 	metric_entry me;
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) == pdTRUE) {
-		pcf_lookup(&font_pf, unicode, &b, &me);
-		xSemaphoreGive(s_fileAccessSemaphore);
-	}
+	pcf_lookup(&font_pf, unicode, &b, &me);
 	for (int i = 0, stride = 4; i < b.length; i += stride) {
 		for (int j = 0; j < stride; j++) {
 			char bits = b.data[i + j];
