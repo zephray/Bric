@@ -57,5 +57,7 @@ Directory *hal_fs_opendir(char *path);
 int hal_fs_readdir(Directory *dp, FileInfo* fno);
 // Close a directory
 int hal_fs_closedir(Directory *dp);
+// Change current directory
+int hal_fs_chdir(char *path);
 
 #endif

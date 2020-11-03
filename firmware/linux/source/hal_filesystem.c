@@ -42,12 +42,12 @@ File *hal_fs_open(char *path, OpenMode mode) {
 
 // Read from a file, return bytes read, negative on error
 int hal_fs_read(File *fp, void *dst, size_t count) {
-    return fread(dst, count, 1, fp);
+    return fread(dst, 1, count, fp);
 }
 
 // Write to a file, return bytes written, negative on error
 int hal_fs_write(File *fp, void *src, size_t count) {
-    return fwrite(src, count, 1, fp);
+    return fwrite(src, 1, count, fp);
 }
 
 // Get current seek, negative on error
@@ -97,4 +97,9 @@ int hal_fs_readdir(Directory *dp, FileInfo* fno) {
 // Close a directory
 int hal_fs_closedir(Directory *dp) {
     return closedir(dp);
+}
+
+// Change current directory 
+int hal_fs_chdir(char *path) {
+    return chdir(path);
 }

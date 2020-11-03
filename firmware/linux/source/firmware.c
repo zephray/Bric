@@ -23,7 +23,7 @@ void housekeepingTask(void *arg){
 
 int main(){
     xTaskCreate(housekeepingTask, "Housekeeping Task", 128,
-            NULL, 1, NULL);
+            NULL, configMAX_PRIORITIES, NULL);
     xTaskCreate(startup_task, "Startup Task", STARTUP_TASK_HEAPSIZE,
             NULL, STARTUP_TASK_PRIORITY, NULL);
     vTaskStartScheduler();
@@ -34,11 +34,11 @@ int main(){
 void vAssertCalled( unsigned long ulLine, const char * const pcFileName )
 {
     printf("ASSERT: %s : %d\n", pcFileName, (int)ulLine);
-    while(1);
+    return;
 }
 
 void vApplicationMallocFailedHook(void)
 {
     printf("Malloc failed\n");
-    while(1);
+    return;
 }

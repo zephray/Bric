@@ -16,7 +16,7 @@ typedef enum {
     AF_S32LE
 } AudioFormat;
 
-typedef void (* AudioCallback) (void *userdata, uint8_t *stream, uint32_t len);
+typedef size_t (* AudioCallback) (void *userdata, uint8_t *stream, uint32_t len);
 
 int hal_audio_init();
 int hal_audio_start(int samplerate, AudioFormat format, AudioCallback cb, void *userdata);

@@ -312,7 +312,5 @@ void hal_disp_draw(Canvas *src, RefreshMode refMode) {
             ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 
                     hal_disp_conv_pix(PIXFMT_ARGB8888, src->pixelFormat, hal_disp_get(src, xx, yy));
     }
-    // Eink is slow
-    //vTaskDelay(pdMS_TO_TICKS(500));
     SDL_Flip(screen);
 }

@@ -31,12 +31,14 @@ void startup_task(void *pvParameters) {
 	font_init();
 	//font_disp(fb, 0, 0, 0, "Hello World", 12, CE_ASCII);
 
+	hal_fs_chdir(APP_ROOT);
+
 	Directory *directory; /* Directory object */
 	FileInfo fileInformation;
 	int y = 0;
 
 	printf("\r\nList the file in that directory......\r\n");
-	directory = hal_fs_opendir(APP_ROOT);
+	directory = hal_fs_opendir(".");
 	if (directory == NULL)
 	{
 		printf("Open directory failed.\r\n");
@@ -67,12 +69,12 @@ void startup_task(void *pvParameters) {
 				continue;
 			font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
 			y += 16;
-			//break; // Play the first file for now
+			break; // Play the first file for now
 		}
 	}
 	hal_disp_draw(fb, REFRESH_PARTIAL);
 
-	/*hal_audio_init();
+	hal_audio_init();
 	hal_audio_set_volume(0xa0);
 
 	DecoderContext *ctx = NULL;
@@ -83,29 +85,32 @@ void startup_task(void *pvParameters) {
 	}
 	dec_openfile(ctx, fileInformation.fname);
 
-	uint32_t charge = LTC2942_GetCharge();
-	uint32_t tick = perf_get_counter();
+	//uint32_t charge = LTC2942_GetCharge();
+	//uint32_t tick = perf_get_counter();
 
 	// Playback
-	hal_audio_start(44100, AF_S16LE, dec_audio_callback, ctx);
+	if (hal_audio_start(44100, AF_S16LE, dec_audio_callback, ctx) < 0) {
+		printf("Unable to start audio subsystem.\r\n");
+		vTaskSuspend(NULL);
+	}
 	dec_play(ctx);
 
 	while (!ctx->finished) {
 		vTaskDelay(pdMS_TO_TICKS(10));
 	}
 
-	charge -= LTC2942_GetCharge();
-	tick = perf_get_counter() - tick;
-	uint32_t voltage = LTC2942_GetVoltage();
+	//charge -= LTC2942_GetCharge();
+	//tick = perf_get_counter() - tick;
+	//uint32_t voltage = LTC2942_GetVoltage();
 
-	generatePerfReport();
+	//generatePerfReport();
 
 	dec_close(ctx);
 	hal_audio_stop();
 
 	vPortFree(ctx);
 
-	uint32_t power = (uint32_t)(((float)charge * 0.085f) / ((float) tick / 10000.0f / 3600.0f) * ((float)voltage / 1000.0f));
+	/*uint32_t power = (uint32_t)(((float)charge * 0.085f) / ((float) tick / 10000.0f / 3600.0f) * ((float)voltage / 1000.0f));
 	char *buf = pvPortMalloc(128);
 	sprintf(buf, "Coulomb Counter: %d LSB", charge);
 	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);

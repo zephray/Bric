@@ -157,3 +157,9 @@ int hal_fs_closedir(Directory *dp) {
     xSemaphoreGive(s_fileAccessSemaphore);
     return (result == FR_OK) ? 0 : -1;
 }
+
+// Change current directory
+int hal_fs_chdir(char *path) {
+    FRESULT result = f_chdir(path);
+    return (result == FR_OK) ? 0 : -1;
+}
