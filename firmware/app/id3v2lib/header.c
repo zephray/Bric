@@ -10,9 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-
 #include "ff.h"
+
 #include "header.h"
 #include "utils.h"
 
@@ -36,21 +35,17 @@ int _has_id3v2tag(char* raw_header)
     return 0;
 }
 
-ID3v2_header* get_tag_header(const char* file_name)
+ID3v2_header* get_tag_header_with_file(FIL *file)
 {
     char buffer[ID3_HEADER];
-    FIL file;
     uint32_t bytes;
-    if (f_open(&file, file_name, FA_READ) != FR_OK)
-    {
-        perror("Error opening file");
-        return NULL;
-    }
-
-    f_read(&file, buffer, ID3_HEADER, &bytes);
-    f_close(&file);
+    f_lseek(file, 0);
+    f_read(file, buffer, ID3_HEADER, &bytes);
+    if (bytes != ID3_HEADER)
+    	return NULL;
     return get_tag_header_with_buffer(buffer, ID3_HEADER);
 }
+
 ID3v2_header* get_tag_header_with_buffer(char *buffer, int length)
 {
     int position = 0;
@@ -71,7 +66,7 @@ ID3v2_header* get_tag_header_with_buffer(char *buffer, int length)
     tag_header->flags = buffer[position += ID3_HEADER_REVISION];
     tag_header->tag_size = syncint_decode(btoi(buffer, ID3_HEADER_SIZE, position += ID3_HEADER_FLAGS));
 
-    if(tag_header->flags&(1<<6)==(1<<6))
+    if((tag_header->flags&(1<<6))==(1<<6))
     {
       // an extended header exists, so we retrieve the actual size of it and save it into the struct
       tag_header->extended_header_size = syncint_decode(btoi(buffer, ID3_EXTENDED_HEADER_SIZE, position += ID3_HEADER_SIZE));

@@ -10,7 +10,8 @@
 #ifndef id3v2lib_utils_h
 #define id3v2lib_utils_h
 
-#include "../../../app/id3v2lib/types.h"
+#include <stdint.h>
+#include "types.h"
 
 unsigned int btoi(char* bytes, int size, int offset);
 char* itob(int integer);
@@ -18,7 +19,6 @@ int syncint_encode(int value);
 int syncint_decode(int value);
 void add_to_list(ID3v2_frame_list* list, ID3v2_frame* frame);
 ID3v2_frame* get_from_list(ID3v2_frame_list* list, char* frame_id);
-void free_tag(ID3v2_tag* tag);
 char* get_mime_type_from_filename(const char* filename);
 
 void genre_num_string(char* dest, char *genre_data);

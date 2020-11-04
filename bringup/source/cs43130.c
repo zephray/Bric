@@ -94,7 +94,7 @@ void CS43130_Init() {
     // Set ASP sample rate to 44.1kHz
     CS43130_WriteReg(0x1000b, 0x01);
     // Set ASP sample bit size
-    CS43130_WriteReg(0x1000c, 0x06); // 0x00: 32 bits, 0x05: 24bits 0x06: 16bits
+    CS43130_WriteReg(0x1000c, 0x00); // 0x00: 32 bits, 0x05: 24bits 0x06: 16bits
     // Set ASP numerator
     CS43130_WriteReg(0x40010, 0x01);
     CS43130_WriteReg(0x40011, 0x00);
@@ -118,11 +118,11 @@ void CS43130_Init() {
     CS43130_WriteReg(0x50001, 0x00);
     // Set ASP channel size and enable
     // For 16 bit per sample
-    CS43130_WriteReg(0x5000a, 0x05);
-	CS43130_WriteReg(0x5000b, 0x0d);
+    //CS43130_WriteReg(0x5000a, 0x05);
+	//CS43130_WriteReg(0x5000b, 0x0d);
     // For 32 bit per sample
-    //CS43130_WriteReg(0x5000a, 0x07);
-    //CS43130_WriteReg(0x5000b, 0x0f);
+    CS43130_WriteReg(0x5000a, 0x07);
+    CS43130_WriteReg(0x5000b, 0x0f);
 
     // Configure PCM filter
     CS43130_WriteReg(0x90000, 0x02);

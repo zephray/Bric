@@ -226,6 +226,9 @@ void pcf_bitmap_find(bitmap_table * t, File * f, uint32_t i, bitmap * b) {
 	if (size < 0) { return; }
 	if (hal_fs_seek(f, off) < 0) { return; }
 	uint8_t * data = b->data = pvPortMalloc(size);
+	if (!data) {
+		return;
+	}
 	b->length = size;
 	hal_fs_read(f, data, size);
 }

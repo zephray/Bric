@@ -25,7 +25,13 @@ void font_init() {
 void font_draw(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h) {
 	bitmap b;
 	metric_entry me;
-	pcf_lookup(&font_pf, unicode, &b, &me);
+	b.data = NULL;
+	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) == pdTRUE) {
+		pcf_lookup(&font_pf, unicode, &b, &me);
+		xSemaphoreGive(s_fileAccessSemaphore);
+	}
+	if (b.data == NULL)
+		return;
 	for (int i = 0, stride = 4; i < b.length; i += stride) {
 		for (int j = 0; j < stride; j++) {
 			char bits = b.data[i + j];
@@ -84,6 +90,19 @@ uint32_t font_decode(char *c, CharEncoding encoding, int *size) {
     		*size = 1;
     	}
     	break;
+    case CE_UTF16:
+    	ucf = ch & 0xff;
+		ucf |= ((*c++) << 8) & 0xff00;
+		if ((ucf & 0xfc00) == 0xd800) {
+			uint32_t tmp = (*c++) & 0xff;
+			tmp |= ((*c++) << 8) & 0xff00;
+			ucf = ((ucf & 0x03ff) << 10) | (tmp & 0x03ff);
+			*size = 4;
+		}
+		else {
+			*size = 2;
+		}
+		break;
     default:
         fprintf(stderr, "Encoding not supported yet!\n");
         break;
@@ -97,6 +116,8 @@ void font_disp(Canvas *canvas, int x, int y, uint32_t color, char *string, int l
     while ((count < len) && (string[count])) {
         uint32_t ucf = font_decode(&(string[count]), encoding, &char_size);
         count += char_size;
+        if ((count == char_size) && (ucf == 0xfeff))
+        	continue; // Skip BOM
         int w, h;
         font_draw(canvas, x, y, color, ucf, &w, &h);
         x += w;

@@ -12,6 +12,7 @@
 typedef enum {
     CE_UCS2,
     CE_UTF8,
+	CE_UTF16,
     CE_ASCII,
     CE_SHIFT_JIS,
     CE_GB2312

@@ -6,42 +6,57 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
+#include "FreeRTOS.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdint.h>
+#include "ff.h"
 
 #include "frame.h"
 #include "utils.h"
 #include "constants.h"
 
-ID3v2_frame* parse_frame(char* bytes, int offset, int version)
+ID3v2_frame* parse_frame(FIL *file, int skip, int offset, int version)
 {
     ID3v2_frame* frame = new_frame();
+    uint32_t bytes;
     
     // Parse frame header
-    memcpy(frame->frame_id, bytes + offset, ID3_FRAME_ID);
+    f_lseek(file, skip + offset);
+    f_read(file, frame->frame_id, ID3_FRAME_ID, &bytes);
+    if (bytes != ID3_FRAME_ID)
+    	goto error;
     // Check if we are into padding
     if(memcmp(frame->frame_id, "\0\0\0\0", 4) == 0)
     {
-        free(frame);
+        vPortFree(frame);
         return NULL;
     }
 
-    frame->size = btoi(bytes, 4, offset += ID3_FRAME_ID);
+    char buf[ID3_FRAME_SIZE];
+    f_read(file, buf, ID3_FRAME_SIZE, &bytes);
+    if (bytes != ID3_FRAME_SIZE)
+    	goto error;
+
+    frame->size = btoi(buf, ID3_FRAME_SIZE, 0);
     if(version == ID3v24)
     {
         frame->size = syncint_decode(frame->size);
     }
 
-    memcpy(frame->flags, bytes + (offset += ID3_FRAME_SIZE), 2);
-    
+    f_read(file, frame->flags, ID3_FRAME_FLAGS, &bytes);
+    if (bytes != ID3_FRAME_FLAGS)
+    	goto error;
+
     // Load frame data
-    frame->data = (char*) malloc(frame->size * sizeof(char));
-    memcpy(frame->data, bytes + (offset += ID3_FRAME_FLAGS), frame->size);
+    frame->offset = f_tell(file);
     
     return frame;
+
+error:
+	if (frame)
+		vPortFree(frame);
+	return NULL;
 }
 
 int get_frame_type(char* frame_id)
@@ -59,25 +74,44 @@ int get_frame_type(char* frame_id)
     }
 }
 
-ID3v2_frame_text_content* parse_text_frame_content(ID3v2_frame* frame)
+ID3v2_frame_text_content* parse_text_frame_content(FIL *file, ID3v2_frame* frame)
 {
     ID3v2_frame_text_content* content;
+    uint32_t bytes;
+
     if(frame == NULL)
     {
         return NULL;
     }
 
+    f_lseek(file, frame->offset);
     content = new_text_content(frame->size);
-    content->encoding = frame->data[0];
+    if (!content)
+    	goto error;
+
+    f_read(file, &(content->encoding), ID3_FRAME_ENCODING, &bytes);
+    if (bytes != ID3_FRAME_ENCODING)
+    	goto error;
+
     content->size = frame->size - ID3_FRAME_ENCODING;
-    memcpy(content->data, frame->data + ID3_FRAME_ENCODING, content->size);
+    f_read(file, content->data, content->size, &bytes);
+    if (bytes != content->size)
+    	goto error;
 
     return content;
+
+error:
+	if (content) {
+		free_text_content(content);
+	}
+	return NULL;
 }
 
-ID3v2_frame_comment_content* parse_comment_frame_content(ID3v2_frame* frame)
+ID3v2_frame_comment_content* parse_comment_frame_content(FIL *file, ID3v2_frame* frame)
 {
     ID3v2_frame_comment_content *content;
+    uint32_t bytes;
+
     if(frame == NULL)
     {
         return NULL;
@@ -85,33 +119,33 @@ ID3v2_frame_comment_content* parse_comment_frame_content(ID3v2_frame* frame)
     
     content = new_comment_content(frame->size);
     
-    content->text->encoding = frame->data[0];
+    f_lseek(file, frame->offset);
+    f_read(file, &(content->text->encoding), ID3_FRAME_ENCODING, &bytes);
+    if (bytes != ID3_FRAME_ENCODING)
+    	goto error;
     content->text->size = frame->size - ID3_FRAME_ENCODING - ID3_FRAME_LANGUAGE - ID3_FRAME_SHORT_DESCRIPTION;
-    memcpy(content->language, frame->data + ID3_FRAME_ENCODING, ID3_FRAME_LANGUAGE);
-    content->short_description = "\0"; // Ignore short description
-    memcpy(content->text->data, frame->data + ID3_FRAME_ENCODING + ID3_FRAME_LANGUAGE + 1, content->text->size);
+    f_read(file, content->language, ID3_FRAME_LANGUAGE, &bytes);
+    if (bytes != ID3_FRAME_LANGUAGE)
+    	goto error;
+    // Ignore short description
+    f_lseek(file, frame->offset + ID3_FRAME_ENCODING + ID3_FRAME_LANGUAGE + 1);
+    f_read(file, content->text->data, content->text->size, &bytes);
+    if (bytes != content->text->size)
+    	goto error;
     
     return content;
+
+error:
+	if (content) {
+		free_comment_content(content);
+	}
+	return NULL;
 }
 
-char* parse_mime_type(char* data, int* i)
-{
-    char* mime_type = (char*) malloc(30 * sizeof(char));
-    
-    while(data[*i] != '\0' && *i < 30)
-    {
-        mime_type[*i - 1] = data[*i];
-        (*i)++;
-    }
-    mime_type[*i - 1] = '\0';
-    
-    return mime_type;
-}
-
-ID3v2_frame_apic_content* parse_apic_frame_content(ID3v2_frame* frame)
+ID3v2_frame_apic_content* parse_apic_frame_content(FIL *file, ID3v2_frame* frame)
 {
     ID3v2_frame_apic_content *content;
-    int i = 1; // Skip ID3_FRAME_ENCODING
+    uint32_t bytes;
 
     if(frame == NULL)
     {
@@ -119,27 +153,75 @@ ID3v2_frame_apic_content* parse_apic_frame_content(ID3v2_frame* frame)
     }
     
     content = new_apic_content();
+    if (!content)
+    	goto error;
     
-    content->encoding = frame->data[0];
-    
-    content->mime_type = parse_mime_type(frame->data, &i);
-    content->picture_type = frame->data[++i];
-    content->description = &frame->data[++i];
+    f_lseek(file, frame->offset);
+    f_read(file, &(content->encoding), ID3_FRAME_ENCODING, &bytes);
+    if (bytes != ID3_FRAME_ENCODING)
+    	goto error;
 
+    char buf[30];
+    int i = 0;
+    char ch;
+    do {
+        f_read(file, &ch, 1, &bytes);
+        if (bytes != 1)
+        	goto error;
+        buf[i] = ch;
+        i++;
+    } while (ch != '\0' && i < 30);
+
+    content->mime_type = pvPortMalloc(i);
+    if (!(content->mime_type))
+    	goto error;
+    strcpy(content->mime_type, buf);
+
+    f_read(file, &(content->picture_type), 1, &bytes);
+    if (bytes != 1)
+    	goto error;
+
+    //content->description = &frame->data[++i];
+    int seek = f_tell(file);
+    i = 0;
     if (content->encoding == 0x01 || content->encoding == 0x02) {
             /* skip UTF-16 description */
-            for ( ; * (uint16_t *) (frame->data + i); i += 2);
-            i += 2;
+            char buf[2];
+            do {
+                f_read(file, buf, 2, &bytes);
+                if (bytes != 2)
+                	goto error;
+                i += 2;
+            } while (buf[0] && buf[1]);
     }
     else {
             /* skip UTF-8 or Latin-1 description */
-            for ( ; frame->data[i] != '\0'; i++);
-            i += 1;
+            char buf[1];
+            do {
+                f_read(file, buf, 1, &bytes);
+                if (bytes != 1)
+                	goto error;
+                i += 1;
+            } while (buf[0]);
     }
-  
-    content->picture_size = frame->size - i;
-    content->data = (char*) malloc(content->picture_size);
-    memcpy(content->data, frame->data + i, content->picture_size);
-    
+    f_lseek(file, seek);
+    content->description = pvPortMalloc(i);
+    f_read(file, content->description, i, &bytes);
+    if (bytes != i)
+    	goto error;
+
+    seek = f_tell(file);
+    content->picture_size = frame->size - (seek - frame->offset);
+    content->offset = f_tell(file);
+
     return content;
+error:
+	if (content) {
+		if (content->mime_type)
+			vPortFree(content->mime_type);
+		if (content->description)
+			vPortFree(content->description);
+		vPortFree(content);
+	}
+	return NULL;
 }

@@ -278,7 +278,7 @@ void EPD_SwitchToGreyscaleB() {
 	EPD_SwitchWaveform(EPD_LUTGreyscaleB);
 }
 
-void EPD_Clear() {
+void EPD_ClearBuffer() {
 	EPD_WriteCmd(0x4e); // Set RAM X address
 	EPD_WriteDat(0x00);
 	EPD_WriteCmd(0x4f);
@@ -293,6 +293,10 @@ void EPD_Clear() {
 	for (int i = 0; i < (16 * 250); i++) {
 		EPD_WriteDat(0xff);
 	}
+}
+
+void EPD_Clear() {
+	EPD_ClearBuffer();
 	EPD_WriteCmd(0x22);
 	EPD_WriteDat(0xc7);
 	EPD_WriteCmd(0x20);
@@ -322,24 +326,6 @@ void EPD_DispImg(uint8_t *buf, bool useBackBuffer) {
 	EPD_Wait();
 }
 
-/*void EPD_Test() {
-	EPD_WriteCmd(0x4e); // Set RAM X address
-	EPD_WriteDat(0x00);
-
-	EPD_WriteCmd(0x4f);
-	EPD_WriteDat(0xf9);
-	EPD_WriteDat(0x00);
-
-	EPD_WriteCmd(0x24);
-	for (int i = 0; i < (16 * 250); i++) {
-		EPD_WriteDat(gImage_basemap[i]);
-	}
-	EPD_WriteCmd(0x22);
-	EPD_WriteDat(0x04);
-	EPD_WriteCmd(0x20);
-	EPD_Wait();
-}*/
-
 static void EPD_SendBitPlane(uint8_t* src, int bp) {
 	for (int x = 0; x < 250; x++) {
 		for (int y = 0; y < 16; y++) {
@@ -353,7 +339,7 @@ static void EPD_SendBitPlane(uint8_t* src, int bp) {
 	}
 }
 
-/*void EPD_Test2() {
+void EPD_DispGreyscale(uint8_t* src) {
 	EPD_SwitchToGreyscaleA();
 
 	EPD_WriteCmd(0x4e); // Set RAM X address
@@ -364,9 +350,9 @@ static void EPD_SendBitPlane(uint8_t* src, int bp) {
 	EPD_WriteDat(0x00);
 
 	EPD_WriteCmd(0x24);
-	EPD_SendBitPlane(7);
+	EPD_SendBitPlane(src, 7);
 	EPD_WriteCmd(0x26);
-	EPD_SendBitPlane(6);
+	EPD_SendBitPlane(src, 6);
 	EPD_WriteCmd(0x22);
 	EPD_WriteDat(0x04);
 	EPD_WriteCmd(0x20);
@@ -382,14 +368,14 @@ static void EPD_SendBitPlane(uint8_t* src, int bp) {
 	EPD_WriteDat(0x00);
 
 	EPD_WriteCmd(0x24);
-	EPD_SendBitPlane(5);
+	EPD_SendBitPlane(src, 5);
 	EPD_WriteCmd(0x26);
-	EPD_SendBitPlane(4);
+	EPD_SendBitPlane(src, 4);
 	EPD_WriteCmd(0x22);
 	EPD_WriteDat(0x04);
 	EPD_WriteCmd(0x20);
 	EPD_Wait();
-}*/
+}
 
 void EPD_DeepSleep() {
 	EPD_WriteCmd(0x10);

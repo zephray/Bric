@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
+#include "ff.h"
 
 #include "utils.h"
 
@@ -31,7 +31,7 @@ char* itob(int integer)
 {
     int i;
     int size = 4;
-    char* result = (char*) malloc(sizeof(char) * size);
+    char* result = (char*) pvPortMalloc(sizeof(char) * size);
     
     // We need to reverse the bytes because Intel uses little endian.
     char* aux = (char*) &integer;
@@ -105,23 +105,6 @@ ID3v2_frame* get_from_list(ID3v2_frame_list* list, char* frame_id)
         list = list->next;
     }
     return NULL;
-}
-
-void free_tag(ID3v2_tag* tag)
-{
-    ID3v2_frame_list *list;
-
-    free(tag->raw);
-    free(tag->tag_header);
-    list = tag->frames;
-    while(list != NULL)
-    {
-        if (list->frame) free(list->frame->data);
-        free(list->frame);
-        list = list->next;
-    }
-    free(list);
-    free(tag);
 }
 
 char* get_mime_type_from_filename(const char* filename)
@@ -772,7 +755,7 @@ int has_bom(uint16_t* string)
 
 uint16_t* char_to_utf16(char* string, int size)
 {
-    uint16_t* result = (uint16_t*) malloc(size * sizeof(uint16_t));
+    uint16_t* result = (uint16_t*) pvPortMalloc(size * sizeof(uint16_t));
     memcpy(result, string, size);
     return result;
 }
@@ -803,7 +786,7 @@ char* get_path_to_file(const char* file)
     char* file_name = strrchr(file, '/');
     unsigned long size = strlen(file) - strlen(file_name) + 1; // 1 = trailing '/'
     
-    char* file_path = (char*) malloc(size * sizeof(char));
+    char* file_path = (char*) pvPortMalloc(size * sizeof(char));
     strncpy(file_path, file, size);
     
     return file_path;

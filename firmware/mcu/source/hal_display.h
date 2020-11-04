@@ -31,7 +31,7 @@ typedef struct canvas {
     uint32_t width;
     uint32_t height;
     PixelFormat pixelFormat;
-    char buf[];
+    uint8_t buf[];
 } Canvas;
 
 // Power control
@@ -43,6 +43,7 @@ void hal_disp_exit_sleep();
 
 // Framebuffer operation
 Canvas *hal_disp_create(int w, int h, PixelFormat fmt);
+void hal_disp_free(Canvas *canvas);
 void hal_disp_set(Canvas *dst, int x, int y, uint32_t color);
 uint32_t hal_disp_get(Canvas *src, int x, int y);
 void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color);

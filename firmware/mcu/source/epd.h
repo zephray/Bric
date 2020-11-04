@@ -10,8 +10,10 @@
 #define _EPD_H_
 
 void EPD_Init();
+void EPD_ClearBuffer();
 void EPD_Clear();
 void EPD_DispImg(uint8_t *buf, bool useBackBuffer);
 void EPD_SwitchToPartial();
+void EPD_DispGreyscale(uint8_t* src);
 
 #endif /* _EPD_H_ */

@@ -85,6 +85,10 @@ Canvas *hal_disp_create(int w, int h, PixelFormat fmt) {
     return canvas;
 }
 
+void hal_disp_free(Canvas *canvas) {
+	vPortFree(canvas);
+}
+
 void hal_disp_set(
         Canvas *dst, int x, int y, uint32_t color) {
     int bpp;
@@ -182,6 +186,7 @@ uint32_t hal_disp_get(Canvas *src, int x, int y) {
         fprintf(stderr, "Unimplemented function: Get pixel in color buffer\n");
         break;
     }
+    return 0;
 }
 
 void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
@@ -312,6 +317,10 @@ void hal_disp_draw(Canvas *src, RefreshMode refMode) {
 
 	if (src->pixelFormat == PIXFMT_Y1) {
 		EPD_DispImg((uint8_t *)src->buf, (refMode == REFRESH_PARTIAL));
+	}
+	else if (src->pixelFormat == PIXFMT_Y8) {
+		EPD_DispGreyscale((uint8_t *)src->buf);
+		EPD_ClearBuffer(); // It is necessary to clear internal state after using Greyscale mode
 	}
 	else {
 		// TODO

@@ -10,98 +10,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
-
 #include "ff.h"
+
 #include "id3v2lib.h"
 
 
 ID3v2_tag* load_tag(const char* file_name)
 {
-    char *buffer;
-    FIL file;
-    int header_size;
+    FIL *file = NULL;
     ID3v2_tag *tag;
-    uint32_t bytes;
 
-    // get header size
-    ID3v2_header *tag_header = get_tag_header(file_name);
-    if(tag_header == NULL) {
-        return NULL;
-    }
-    header_size = tag_header->tag_size + 10;
-    free(tag_header);
+    file = pvPortMalloc(sizeof(FIL));
+    if (!file)
+    	return NULL;
 
     // allocate buffer and fetch header
-    if (f_open(&file, file_name, FA_READ) != FR_OK)
+    if(f_open(file, file_name, FA_READ) != FR_OK)
     {
         perror("Error opening file");
         return NULL;
     }
-    buffer = (char*) malloc((10+header_size) * sizeof(char));
-    if(buffer == NULL) {
-        perror("Could not allocate buffer");
-        f_close(&file);
-        return NULL;
-    }
-    //fseek(file, 10, SEEK_SET);
-    f_read(&file, buffer, header_size+10, &bytes);
-    f_close(&file);
-
 
     //parse free and return
-    tag = load_tag_with_buffer(buffer, header_size);
-    free(buffer);
+    tag = load_tag_with_file(file);
 
     return tag;
 }
 
-ID3v2_tag* load_tag_with_buffer(char *bytes, int length)
+// header is optional
+ID3v2_tag* load_tag_with_file(FIL *file)
 {
     // Declaration
     ID3v2_frame *frame;
     int offset = 0;
     ID3v2_tag* tag;
     ID3v2_header* tag_header;
+    uint32_t skip = 0;
+    int length = 0;
 
     // Initialization
-    tag_header = get_tag_header_with_buffer(bytes, length);
+    tag_header = get_tag_header_with_file(file);
 
     if(tag_header == NULL) // no valid header found
       return NULL;
 
+    length = tag_header->tag_size + 10;
+
     if(get_tag_version(tag_header) == NO_COMPATIBLE_TAG)
     {
         // no supported id3 tag found
-        free(tag_header);
+        vPortFree(tag_header);
         return NULL;
     }
 
     if(length < tag_header->tag_size+10)
     {
         // Not enough bytes provided to parse completely. TODO: how to communicate to the user the lack of bytes?
-        free(tag_header);
+        vPortFree(tag_header);
         return NULL;
     }
 
     tag = new_tag();
 
+    // Save file pointer
+    tag->file = file;
+
     // Associations
     tag->tag_header = tag_header;
 
     // move the bytes pointer to the correct position
-    bytes+=10; // skip header
+    skip+=10; // skip header
     if(tag_header->extended_header_size)
-      // an extended header exists, so we skip it too
-      bytes+=tag_header->extended_header_size+4; // don't forget to skip the extended header size bytes too
+        // an extended header exists, so we skip it too
+        skip+=tag_header->extended_header_size+4; // don't forget to skip the extended header size bytes too
     
-    tag->raw = (char*) malloc(tag->tag_header->tag_size * sizeof(char));
-    memcpy(tag->raw, bytes, tag_header->tag_size);
     // we use tag_size here to prevent copying too much if the user provides more bytes than needed to this function
 
     while(offset < tag_header->tag_size)
     {
-        frame = parse_frame(tag->raw, offset, get_tag_version(tag_header));
+        frame = parse_frame(file, skip, offset, get_tag_version(tag_header));
 
         if(frame != NULL)
         {
