@@ -9,9 +9,9 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include <stdio.h>
+#include <string.h>
 #include "hal_filesystem.h"
 #include "tjpgd.h"
-#include "sdcard.h"
 #include "id3v2lib/id3v2lib.h"
 #include "tags.h"
 
@@ -47,12 +47,12 @@ uint16_t in_func (JDEC* jd, uint8_t* buff, uint16_t nbyte)
 
     if (buff) {
         /* Read bytes from input stream */
-        if (f_read(dev->fp, buff, nbyte, &bytes) != FR_OK) {
+        if ((bytes = hal_fs_read(dev->fp, buff, nbyte)) < 0) {
         	bytes = 0;
         }
     } else {
         /* Remove bytes from input stream */
-        f_lseek(dev->fp, f_tell(dev->fp) + nbyte);
+        hal_fs_seek(dev->fp, hal_fs_tell(dev->fp) + nbyte);
         bytes = nbyte;
     }
     return bytes;
@@ -180,11 +180,7 @@ static uint16_t out_func (JDEC* jd, void* bitmap, JRECT* rect)
 static ID3v2_tag *tags;
 
 int tags_open(char *fn) {
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
 	tags = load_tag(fn);
-	xSemaphoreGive(s_fileAccessSemaphore);
 	if (!tags)
 		return -1;
 
@@ -199,11 +195,7 @@ int tags_display_cover(uint8_t *destination, size_t stride, int width, int heigh
 	if (!frame)
 		return -1;
 
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
 	ID3v2_frame_apic_content *apic = parse_apic_frame_content(tags->file, frame);
-	xSemaphoreGive(s_fileAccessSemaphore);
 	if (!apic)
 		return -1;
 
@@ -214,10 +206,7 @@ int tags_display_cover(uint8_t *destination, size_t stride, int width, int heigh
 
     devid.fp = tags->file;
 
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
-	f_lseek(devid.fp, apic->offset);
+    hal_fs_seek(devid.fp, apic->offset);
 
 	// Allocate a work area for TJpgDec
 	work = pvPortMalloc(3100);
@@ -261,11 +250,9 @@ int tags_display_cover(uint8_t *destination, size_t stride, int width, int heigh
 			printf("Failed to decompress: rc=%d\n", res);
 			goto error;
 		}
-		xSemaphoreGive(s_fileAccessSemaphore);
 		vPortFree(devid.lbuf);
 	} else {
 		printf("Failed to prepare: rc=%d\n", res);
-		xSemaphoreGive(s_fileAccessSemaphore);
 		goto error;
 	}
 
@@ -286,11 +273,7 @@ error:
 }
 
 static char *tags_get_string_content(ID3v2_frame *frame) {
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
 	ID3v2_frame_text_content *content = parse_text_frame_content(tags->file, frame);
-	xSemaphoreGive(s_fileAccessSemaphore);
 	if (!content)
 		return NULL;
 
@@ -326,10 +309,6 @@ char *tags_get_artist() {
 }
 
 void tags_close() {
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
-		printf("Unable to obtain lock to access filesystem.\n");
-	}
-	f_close(tags->file);
-	xSemaphoreGive(s_fileAccessSemaphore);
+    hal_fs_close(tags->file);
 	free_tag(tags);
 }

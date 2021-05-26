@@ -15,38 +15,180 @@
 #include "font.h"
 #include "pcf.h"
 
+#include "fonts/uni2oem2312.h"
+#include "fonts/font_8_ascii.h"
+#ifdef FNT_ENABLE_12
+#include "fonts/font_12_ascii.h"
+#include "fonts/font_12.h"
+#endif
+#ifdef FNT_ENABLE_16
+#include "fonts/font_16_ascii.h"
+#include "fonts/font_16.h"
+#endif
+
 static pf font_pf;
+static Font currentFont;
+static uint8_t *fontASCII;
+static uint8_t *fontGB;
+static int fontHeight; // Height
+static int fontWidth; // Half-width Width
+static int fontSize; // Half-width size
 
 void font_init() {
     font_pf.init = 0;
-    pcf_open(&font_pf, PCF_FONT_PATH);
+    font_set_font(FNT_8);
+    //pcf_open(&font_pf, PCF_FONT_PATH);
+}
+
+void font_set_font(Font font) {
+    currentFont = font;
+    if (currentFont == FNT_8) {
+        fontASCII = (uint8_t *)font_8_ascii;
+        fontGB = NULL;
+        fontHeight = 8;
+        fontWidth = 5;
+        fontSize = 5;
+    }
+    else if (currentFont == FNT_12) {
+#ifdef FNT_ENABLE_12
+        fontASCII = (uint8_t *)font_12_ascii;
+        fontGB = (uint8_t *)font_12;
+#else
+        fontASCII = NULL;
+        fontGB = NULL;
+#endif
+        fontHeight = 12;
+        fontWidth = 6;
+        fontSize = 9;
+    }
+    else if (currentFont == FNT_16) {
+#ifdef FNT_ENABLE_16
+        fontASCII = (uint8_t *)font_16_ascii;
+        fontGB = (uint8_t *)font_16;
+#else
+        fontASCII = NULL;
+        fontGB = NULL;
+#endif
+        fontHeight = 16;
+        fontWidth = 8;
+        fontSize = 16;
+    }
+}
+
+uint16_t font_ucs_to_gbk(uint16_t uni) {
+    const uint16_t *p;
+    uint16_t c = 0, uc;
+    uint32_t i = 0, n, li, hi;
+
+    if (uni < 0x80) {   /* ASCII? */
+        c = (uint16_t)uni;
+
+    } else { /* Non-ASCII */
+        uc = (uint16_t)uni;
+        p = uni2oem2312;
+        hi = sizeof(uni2oem2312) / 4 - 1;
+        li = 0;
+        for (n = 16; n; n--) {
+            i = li + (hi - li) / 2;
+            if (uc == p[i * 2]) break;
+            if (uc > p[i * 2]) {
+                li = i;
+            } else {
+                hi = i;
+            }
+        }
+        if (n != 0) c = p[i * 2 + 1];
+    }
+
+    return c;
+}
+
+// The graph is packed (byte not aligned with line)
+void font_draw_graph(Canvas *canvas, int x, int y, uint32_t color, int w, int h, uint8_t *graph) {
+    int xx = 0;
+    int yy = 0;
+    int bytes = w * h / 8;
+    for (int i = 0; i < bytes; i++) {
+        uint8_t byte = *graph++;
+        for (int j = 0; j < 8; j++) {
+            if (!(byte & 0x01)) {
+                hal_disp_set(canvas, x + xx, y + yy, color);
+            }
+            byte >>= 1;
+            xx++;
+            if (xx == w) {
+                xx = 0;
+                yy++;
+            }
+        }
+    }
+}
+
+void font_draw_gb(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h) {
+    uint16_t gbk = font_ucs_to_gbk(unicode);
+
+    if (gbk < 0x80) {
+        // ASCII
+        *w = fontWidth;
+        *h = fontHeight;
+        uint8_t *g;
+        if (!fontASCII)
+            return;
+        g = fontASCII + (gbk - 0x20) * fontSize;
+        font_draw_graph(canvas, x, y, color, fontWidth, fontHeight, g);
+    }
+    else {
+        // look up GB2312 font
+        *w = fontHeight; // Force square
+        *h = fontHeight;
+        if (!fontGB)
+            return;
+        uint8_t c1 = gbk & 0xff;
+        uint8_t c2 = (gbk >> 8) & 0xff;
+        if ((c1 < 0xa1) || (c2 < 0xa1))
+            return;
+        c1 -= 0xa1;
+        if (c1 > 15) // Region 10-15 are empty, skip
+            c1 -= 6;
+        uint8_t *g = fontGB + (94 * c1 + (c2 - 0xa1)) * fontSize * 2;
+        font_draw_graph(canvas, x, y, color, fontHeight, fontHeight, g);
+    }
+}
+
+void font_draw_pcf(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h) {
+    bitmap b;
+    metric_entry me;
+    b.data = NULL;
+    pcf_lookup(&font_pf, unicode, &b, &me);
+    if (b.data == NULL) {
+        *w = 0;
+        *h = 0;
+        return;
+    }
+    for (int i = 0, stride = 4; i < b.length; i += stride) {
+        for (int j = 0; j < stride; j++) {
+            char bits = b.data[i + j];
+            for (int k = 7; k >= 0; k--) {
+                if (j * 8 + 7 - k > me.character_width) { continue; }
+                if ((bits << k) & 0x80) {
+                    hal_disp_set(canvas, x+j*8+k, y, color);
+                }
+            }
+        }
+        y++;
+    }
+    pcf_bitmap_free(&b);
+    *w = me.character_width;
+    *h = b.length / 4;
 }
 
 void font_draw(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h) {
-	bitmap b;
-	metric_entry me;
-	b.data = NULL;
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) == pdTRUE) {
-		pcf_lookup(&font_pf, unicode, &b, &me);
-		xSemaphoreGive(s_fileAccessSemaphore);
-	}
-	if (b.data == NULL)
-		return;
-	for (int i = 0, stride = 4; i < b.length; i += stride) {
-		for (int j = 0; j < stride; j++) {
-			char bits = b.data[i + j];
-			for (int k = 7; k >= 0; k--) {
-				if (j * 8 + 7 - k > me.character_width) { continue; }
-				if ((bits << k) & 0x80) {
-                    hal_disp_set(canvas, x+j*8+k, y, color);
-				}
-			}
-		}
-        y++;
-	}
-	pcf_bitmap_free(&b);
-    *w = me.character_width;
-    *h = b.length / 4;
+    if (currentFont == FNT_PCF) {
+        font_draw_pcf(canvas, x, y, color, unicode, w, h);
+    }
+    else {
+        font_draw_gb(canvas, x, y, color, unicode, w, h);
+    }
 }
 
 uint32_t font_decode(char *c, CharEncoding encoding, int *size) {

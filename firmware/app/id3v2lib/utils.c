@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ff.h"
+#include "FreeRTOS.h"
+#include "hal_filesystem.h"
 
 #include "utils.h"
 
@@ -736,6 +737,9 @@ char* convert_genre_number(int number)
 	    break;
 	case ID_PSYBIENT:
 	    genre = PSYBIENT;
+	    break;
+	default:
+	    genre = "";
 	    break;
     }
 

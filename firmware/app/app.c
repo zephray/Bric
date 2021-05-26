@@ -22,18 +22,27 @@
 #include "font.h"
 #include "app.h"
 
-void startup_task(void *pvParameters) {
+void app_task(void *pvParameters) {
 	hal_disp_init();
+	//hal_fs_init();
 
 	Canvas *fb = hal_disp_create(256, 128, PIXFMT_Y1);
 	hal_disp_fill(fb, 0, 0, 256, 128, 1);
 
 	font_init();
-	//font_disp(fb, 0, 0, 0, "Hello World", 12, CE_ASCII);
+	font_set_font(FNT_8);
+	font_disp(fb, 0, 0, 0, "The quick brown fox jumps over the lazy dog", 45, CE_UTF8);
+	font_set_font(FNT_12);
+	font_disp(fb, 0, 8, 0, "The quick brown fox jumps over the lazy", 40, CE_UTF8);
+	font_disp(fb, 0, 21, 0, "我能吞下玻璃而不伤身体", 40, CE_UTF8);
+	font_set_font(FNT_16);
+	font_disp(fb, 0, 34, 0, "The quick brown fox jumps over the", 40, CE_UTF8);
+	font_disp(fb, 0, 51, 0, "我能吞下玻璃而不伤身体", 40, CE_UTF8);
+	hal_disp_draw(fb, REFRESH_PARTIAL);
 
-	hal_fs_chdir(APP_ROOT);
+	/*hal_fs_chdir(APP_ROOT);
 
-	Directory *directory; /* Directory object */
+	Directory *directory;
 	FileInfo fileInformation;
 	int y = 0;
 
@@ -67,9 +76,9 @@ void startup_task(void *pvParameters) {
 				continue;
 			if (fileInformation.fname[0] == 'O')
 				continue;
-			font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
+			//font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
 			y += 16;
-			break; // Play the first file for now
+			//break; // Play the first file for now
 		}
 	}
 	hal_disp_draw(fb, REFRESH_PARTIAL);
@@ -108,7 +117,7 @@ void startup_task(void *pvParameters) {
 	dec_close(ctx);
 	hal_audio_stop();
 
-	vPortFree(ctx);
+	vPortFree(ctx);*/
 
 	/*uint32_t power = (uint32_t)(((float)charge * 0.085f) / ((float) tick / 10000.0f / 3600.0f) * ((float)voltage / 1000.0f));
 	char *buf = pvPortMalloc(128);

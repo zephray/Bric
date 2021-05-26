@@ -9,10 +9,8 @@
 #ifndef _SDCARD_H_
 #define _SDCARD_H_
 
-extern SemaphoreHandle_t s_fileAccessSemaphore;
-
 void SDC_InitSdifUnusedDataPin();
-void SDC_CardDetectTask(void *pvParameters);
-void SDC_Test(void *pvParameters);
+int SDC_CardDetect(void);
+void SDC_Test(void);
 
 #endif /* _SDCARD_H_ */

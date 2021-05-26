@@ -10,22 +10,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ff.h"
+#include "FreeRTOS.h"
+#include "hal_filesystem.h"
 
 #include "id3v2lib.h"
 
 
 ID3v2_tag* load_tag(const char* file_name)
 {
-    FIL *file = NULL;
+    File *file = NULL;
     ID3v2_tag *tag;
 
-    file = pvPortMalloc(sizeof(FIL));
+    file = (File *)pvPortMalloc(sizeof(File));
     if (!file)
     	return NULL;
 
     // allocate buffer and fetch header
-    if(f_open(file, file_name, FA_READ) != FR_OK)
+    if((file = hal_fs_open((char *)file_name, OM_READ)) == NULL)
     {
         perror("Error opening file");
         return NULL;
@@ -38,7 +39,7 @@ ID3v2_tag* load_tag(const char* file_name)
 }
 
 // header is optional
-ID3v2_tag* load_tag_with_file(FIL *file)
+ID3v2_tag* load_tag_with_file(File *file)
 {
     // Declaration
     ID3v2_frame *frame;

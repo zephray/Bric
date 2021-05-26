@@ -29,12 +29,10 @@ static const sdmmchost_detect_card_t s_sdCardDetect = {
 };
 
 static FATFS g_fileSystem;
-static FIL g_fileObject;
 
 static volatile bool s_cardInserted     = false;
 static volatile bool s_cardInsertStatus = false;
 
-SemaphoreHandle_t s_fileAccessSemaphore = NULL;
 static SemaphoreHandle_t s_CardDetectSemaphore = NULL;
 
 /* This function is used to init the SDIF unused data pin, DATA4 - DATA7, these pin should be configured
@@ -58,10 +56,9 @@ static void SDC_DetectCallBack(bool isInserted, void *userData)
     xSemaphoreGiveFromISR(s_CardDetectSemaphore, NULL);
 }
 
-void SDC_CardDetectTask(void *pvParameters) {
+int SDC_CardDetect(void) {
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 
-    s_fileAccessSemaphore = xSemaphoreCreateBinary();
     s_CardDetectSemaphore = xSemaphoreCreateBinary();
 
     g_sd.host.base           = SD_HOST_BASEADDR;
@@ -76,109 +73,106 @@ void SDC_CardDetectTask(void *pvParameters) {
     /* SD host init function */
     if (SD_HostInit(&g_sd) == kStatus_Success)
     {
-        while (true)
+        /* take card detect semaphore */
+        if (xSemaphoreTake(s_CardDetectSemaphore, portMAX_DELAY) == pdTRUE)
         {
-            /* take card detect semaphore */
-            if (xSemaphoreTake(s_CardDetectSemaphore, portMAX_DELAY) == pdTRUE)
+            if (s_cardInserted != s_cardInsertStatus)
             {
-                if (s_cardInserted != s_cardInsertStatus)
+                s_cardInserted = s_cardInsertStatus;
+
+                /* power off card */
+                SD_PowerOffCard(g_sd.host.base, g_sd.usrParam.pwr);
+
+                if (s_cardInserted)
                 {
-                    s_cardInserted = s_cardInsertStatus;
+                    printf("\r\nCard inserted.\r\n");
+                    /* power on the card */
+                    SD_PowerOnCard(g_sd.host.base, g_sd.usrParam.pwr);
 
-                    /* power off card */
-                    SD_PowerOffCard(g_sd.host.base, g_sd.usrParam.pwr);
-
-                    if (s_cardInserted)
+                    if (f_mount(&g_fileSystem, driverNumberBuffer, 0U) != FR_OK)
                     {
-                        printf("\r\nCard inserted.\r\n");
-                        /* power on the card */
-                        SD_PowerOnCard(g_sd.host.base, g_sd.usrParam.pwr);
-
-                        if (f_mount(&g_fileSystem, driverNumberBuffer, 0U) != FR_OK)
-						{
-							printf("Mount volume failed.\r\n");
-							vTaskSuspend(NULL);
-						}
-
-				#if (FF_FS_RPATH >= 2U)
-						if (f_chdrive((char const *)driverNumberBuffer) != FR_OK)
-						{
-							printf("Change drive failed.\r\n");
-							vTaskSuspend(NULL);
-						}
-				#endif
-
-                        xSemaphoreGive(s_fileAccessSemaphore);
+                        printf("Mount volume failed.\r\n");
+                        return -3;
                     }
-                }
 
-                if (!s_cardInserted)
-                {
-                    printf("\r\nPlease insert a card into board.\r\n");
+            #if (FF_FS_RPATH >= 2U)
+                    if (f_chdrive((char const *)driverNumberBuffer) != FR_OK)
+                    {
+                        printf("Change drive failed.\r\n");
+                        return -3;
+                    }
+            #endif
+
+                    return 0;
                 }
+            }
+
+            if (!s_cardInserted)
+            {
+                printf("\r\nPlease insert a card into board.\r\n");
+                return -2;
             }
         }
     }
     else
     {
         printf("\r\nSD host init fail\r\n");
+        return -3;
     }
 
-    vTaskSuspend(NULL);
+    return -1;
 }
 
-void SDC_Test(void *pvParameters) {
+void SDC_Test(void) {
 	FRESULT error;
 	DIR directory; /* Directory object */
 	FILINFO fileInformation;
 	const TCHAR driverNumberBuffer[3U] = {SDDISK + '0', ':', '/'};
 
-	if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) == pdTRUE) {
-		if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
-		{
-			printf("Mount volume failed.\r\n");
-			vTaskSuspend(NULL);
-		}
+    if (f_mount(&g_fileSystem, driverNumberBuffer, 0U))
+    {
+        printf("Mount volume failed.\r\n");
+        vTaskSuspend(NULL);
+    }
 
 #if (FF_FS_RPATH >= 2U)
-	    error = f_chdrive((char const *)driverNumberBuffer);
-	    if (error)
-	    {
-	        printf("Change drive failed.\r\n");
-	        vTaskSuspend(NULL);
-	    }
+    error = f_chdrive((char const *)driverNumberBuffer);
+    if (error)
+    {
+        printf("Change drive failed.\r\n");
+        vTaskSuspend(NULL);
+    }
 #endif
 
-		printf("\r\nList the file in that directory......\r\n");
-		if (f_opendir(&directory, "/"))
-		{
-			printf("Open directory failed.\r\n");
-			vTaskSuspend(NULL);
-		}
+    printf("\r\nList the file in that directory......\r\n");
+    if (f_opendir(&directory, "/"))
+    {
+        printf("Open directory failed.\r\n");
+        vTaskSuspend(NULL);
+    }
 
-		for (;;)
-		{
-			error = f_readdir(&directory, &fileInformation);
+    for (;;)
+    {
+        error = f_readdir(&directory, &fileInformation);
 
-			/* To the end. */
-			if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
-			{
-			   break;
-			}
-			if (fileInformation.fname[0] == '.')
-			{
-			   continue;
-			}
-			if (fileInformation.fattrib & AM_DIR)
-			{
-				printf("Directory file : %s.\r\n", fileInformation.fname);
-			}
-			else
-			{
-				printf("General file : %s.\r\n", fileInformation.fname);
-			}
-		}
-	}
+        /* To the end. */
+        if ((error != FR_OK) || (fileInformation.fname[0U] == 0U))
+        {
+           break;
+        }
+        if (fileInformation.fname[0] == '.')
+        {
+           continue;
+        }
+        if (fileInformation.fattrib & AM_DIR)
+        {
+            printf("Directory file : %s.\r\n", fileInformation.fname);
+        }
+        else
+        {
+            printf("General file : %s.\r\n", fileInformation.fname);
+        }
+    }
 
 	vTaskSuspend(NULL);
 }

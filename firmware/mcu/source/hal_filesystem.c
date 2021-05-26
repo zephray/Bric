@@ -6,14 +6,24 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
+#include <stdlib.h>
+#include <string.h>
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "ff.h"
 #include "sdcard.h"
 #include "hal_filesystem.h"
 
+static SemaphoreHandle_t s_fileAccessSemaphore = NULL;
+
 int hal_fs_init() {
-    // TODO
+    s_fileAccessSemaphore = xSemaphoreCreateBinary();
+
+    int result = SDC_CardDetect();
+
+    xSemaphoreGive(s_fileAccessSemaphore);
+
+    return 0;
 }
 
 // Open a file, return pointer when success, NULL on error
@@ -40,13 +50,13 @@ File *hal_fs_open(char *path, OpenMode mode) {
         break;
     default:
         printf("Unsupported file open mode!\n");
-        return -1;
+        return NULL;
         break;
     }
     if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
         printf("Unable to obtain lock to access filesystem.\n");
     }
-    result = f_open(&file, path, fatfsmode);
+    result = f_open((FIL *)&file, path, fatfsmode);
     xSemaphoreGive(s_fileAccessSemaphore);
     if (result != FR_OK) {
         free(file);
@@ -59,7 +69,7 @@ File *hal_fs_open(char *path, OpenMode mode) {
 
 // Read from a file, return bytes read, negative on error
 int hal_fs_read(File *fp, void *dst, size_t count) {
-    int bytes;
+    uint32_t bytes;
     if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
         printf("Unable to obtain lock to access filesystem.\n");
     }
@@ -73,7 +83,7 @@ int hal_fs_read(File *fp, void *dst, size_t count) {
 
 // Write to a file, return bytes written, negative on error
 int hal_fs_write(File *fp, void *src, size_t count) {
-    int bytes;
+    uint32_t bytes;
     if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
         printf("Unable to obtain lock to access filesystem.\n");
     }

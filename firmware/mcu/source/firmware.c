@@ -74,14 +74,14 @@ int main(void) {
 		return -1;
 	}*/
 
-	if (pdPASS !=
+	/*if (pdPASS !=
 		xTaskCreate(SDC_CardDetectTask, "SDC Init", 512U, NULL, (configMAX_PRIORITIES - 1U), NULL))
 	{
 		return -1;
-	}
+	}*/
 
 	if (pdPASS !=
-		xTaskCreate(startup_task, "Startup Task", STARTUP_TASK_HEAPSIZE, NULL, STARTUP_TASK_PRIORITY, NULL))
+		xTaskCreate(app_task, "App Task", APP_TASK_HEAPSIZE, NULL, APP_TASK_PRIORITY, NULL))
 	{
 		return -1;
 	}
@@ -115,7 +115,7 @@ void generatePerfReport()
 {
 	TaskStatus_t *pxTaskStatusArray;
 	volatile UBaseType_t uxArraySize, x;
-	unsigned long ulTotalRunTime, ulStatsAsPercentage;
+	uint32_t ulTotalRunTime, ulStatsAsPercentage;
 
    /* Take a snapshot of the number of tasks in case it changes while this
    function is executing. */

@@ -66,7 +66,7 @@ typedef struct
 {
     ID3v2_header* tag_header;
     ID3v2_frame_list* frames;
-    FIL* file;
+    File* file;
 } ID3v2_tag;
 
 // Constructor functions

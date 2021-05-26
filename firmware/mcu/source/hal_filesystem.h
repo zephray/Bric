@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <dirent.h>
+#include "ff.h"
 
 typedef enum {
     OM_READ,   // r

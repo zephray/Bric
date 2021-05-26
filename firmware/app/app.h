@@ -9,10 +9,10 @@
 #ifndef __APP_H__
 #define __APP_H__
 
-#define STARTUP_TASK_HEAPSIZE (1024u)
+#define APP_TASK_HEAPSIZE (1024u)
 
-#define STARTUP_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
+#define APP_TASK_PRIORITY (configMAX_PRIORITIES - 2U)
 
-void startup_task(void *pvParameters);
+void app_task(void *pvParameters);
 
 #endif
