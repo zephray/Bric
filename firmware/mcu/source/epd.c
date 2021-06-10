@@ -317,7 +317,7 @@ void EPD_DispImg(uint8_t *buf, bool useBackBuffer) {
 	}
 	EPD_WriteCmd(0x22);
 	if (useBackBuffer) {
-		EPD_WriteDat(0x04);
+		EPD_WriteDat(0x0c);
 	}
 	else {
 		EPD_WriteDat(0xc7);

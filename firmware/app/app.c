@@ -19,26 +19,17 @@
 #include "hal_audio.h"
 #include "minimp3.h"
 #include "decoder.h"
-#include "font.h"
 #include "app.h"
+#include "ui.h"
 
 void app_task(void *pvParameters) {
 	hal_disp_init();
-	//hal_fs_init();
+	ui_init();
+	ui_clear();
+	// Check battery calibration status
+	batcal_init();
 
-	Canvas *fb = hal_disp_create(256, 128, PIXFMT_Y1);
-	hal_disp_fill(fb, 0, 0, 256, 128, 1);
-
-	font_init();
-	font_set_font(FNT_8);
-	font_disp(fb, 0, 0, 0, "The quick brown fox jumps over the lazy dog", 45, CE_UTF8);
-	font_set_font(FNT_12);
-	font_disp(fb, 0, 8, 0, "The quick brown fox jumps over the lazy", 40, CE_UTF8);
-	font_disp(fb, 0, 21, 0, "我能吞下玻璃而不伤身体", 40, CE_UTF8);
-	font_set_font(FNT_16);
-	font_disp(fb, 0, 34, 0, "The quick brown fox jumps over the", 40, CE_UTF8);
-	font_disp(fb, 0, 51, 0, "我能吞下玻璃而不伤身体", 40, CE_UTF8);
-	hal_disp_draw(fb, REFRESH_PARTIAL);
+	ui_message("Warning", "Test message 测试信息\nSecond line.");
 
 	/*hal_fs_chdir(APP_ROOT);
 

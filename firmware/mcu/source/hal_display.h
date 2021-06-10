@@ -47,6 +47,7 @@ void hal_disp_free(Canvas *canvas);
 void hal_disp_set(Canvas *dst, int x, int y, uint32_t color);
 uint32_t hal_disp_get(Canvas *src, int x, int y);
 void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color);
+void hal_disp_inv(Canvas *dst, int x, int y, int w, int h);
 void hal_disp_bilt(
         Canvas *dst, Canvas *src,
         int dst_x, int dst_y, int dst_w, int dst_h,

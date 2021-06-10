@@ -363,7 +363,7 @@ void BOARD_InitBootPins(void);
   @{ */
 #define BOARD_INITPINS_SW_SEL_GPIO GPIO /*!<@brief GPIO device name: GPIO */
 #define BOARD_INITPINS_SW_SEL_PORT 0U   /*!<@brief PORT device name: 0U */
-#define BOARD_INITPINS_SW_SEL_PIN 22U   /*!<@brief 0U pin index: 22 */
+#define BOARD_INITPINS_SW_SEL_PIN 30U   /*!<@brief 0U pin index: 30 */
                                         /* @} */
 
 /*! @name PIO0_5 (number 56), SW_PLUS
@@ -384,7 +384,7 @@ void BOARD_InitBootPins(void);
   @{ */
 #define BOARD_INITPINS_SW_BACK_GPIO GPIO /*!<@brief GPIO device name: GPIO */
 #define BOARD_INITPINS_SW_BACK_PORT 0U   /*!<@brief PORT device name: 0U */
-#define BOARD_INITPINS_SW_BACK_PIN 30U   /*!<@brief 0U pin index: 30 */
+#define BOARD_INITPINS_SW_BACK_PIN 22U   /*!<@brief 0U pin index: 22 */
                                          /* @} */
 
 /*! @name PIO0_2 (number 52), EPD_BUSY

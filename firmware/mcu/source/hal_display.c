@@ -213,7 +213,7 @@ void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
             // Not aligned, fallback to using setpixel
             for (int yy = y; yy < y + h; yy++) {
                 for (int xx = x; xx < x + w; xx++)
-                    hal_disp_set(dst, x, y, color);
+                    hal_disp_set(dst, xx, yy, color);
             }
         }
         break;
@@ -222,6 +222,54 @@ void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
             offset = xx * dst->width + y;
             for (int yy = 0; yy < h; yy++)
                 dst->buf[offset++] = (uint8_t)color;
+        }
+        break;
+    case PIXFMT_RGB565:
+    case PIXFMT_RGB888:
+    case PIXFMT_ARGB8888:
+    case PIXFMT_RGBA8888:
+        fprintf(stderr, "Unimplemented function: Fill color buffer\n");
+        break;
+    }
+}
+
+void hal_disp_inv(Canvas *dst, int x, int y, int w, int h) {
+    int bpp;
+    int pbb;
+    size_t offset;
+    uint32_t color;
+
+    switch(dst->pixelFormat) {
+    case PIXFMT_Y1:
+    case PIXFMT_Y2:
+    case PIXFMT_Y4:
+        bpp = hal_disp_get_bpp(dst->pixelFormat);
+        pbb = 8 / bpp;
+        if ((y % pbb == 0) && (h % pbb == 0)) {
+            // Aligned, do byte operation directly
+            for (int xx = x; xx < x + w; xx++) {
+                offset = (xx * dst->height + y) / pbb;
+                for (int yy = 0; yy < (h / pbb); yy++) {
+                    color = dst[offset];
+                    dst->buf[offset++] = ~color;
+                }
+            }
+        }
+        else {
+            // Not aligned, fallback to using setpixel
+            for (int yy = y; yy < y + h; yy++) {
+                for (int xx = x; xx < x + w; xx++)
+                    hal_disp_set(dst, xx, yy, !hal_disp_get(dst, xx, yy));
+            }
+        }
+        break;
+    case PIXFMT_Y8:
+        for (int xx = x; xx < x + w; xx++) {
+            offset = xx * dst->width + y;
+            for (int yy = 0; yy < h; yy++) {
+                color = dst[offset];
+                dst->buf[offset++] = 255 - color;
+            }
         }
         break;
     case PIXFMT_RGB565:
@@ -313,6 +361,7 @@ void hal_disp_draw(Canvas *src, RefreshMode refMode) {
 	if (refMode != curMode) {
 		if (refMode == REFRESH_PARTIAL)
 			EPD_SwitchToPartial();
+		curMode = refMode;
 	}
 
 	if (src->pixelFormat == PIXFMT_Y1) {

@@ -20,32 +20,48 @@
 #define LTC2942_CTRL 0x01
 #define LTC2942_CHARGE_MSB 0x02
 #define LTC2942_CHARGE_LSB 0x03
+#define LTC2942_CHARGE_LOW_MSB 0x06
+#define LTC2942_CHARGE_LOW_LSB 0x07
 #define LTC2942_VOLT_MSB 0x08
 #define LTC2942_VOLT_LSB 0x09
 #define LTC2942_TEMP_MSB 0x0c
 #define LTC2942_TEMP_LSB 0x0d
 
-void LTC2942_Init() {
+/*
+ * Prescaler: M >= 23 * Qbat/Ah. Given 300mAh battery, M >= 23 * 0.3 = 6.9
+ * */
+// ADC Sleep, Prescaler = 8, AL/CC disabled
+#define LTC2942_CTRL_VAL (0x18)
+
+bool LTC2942_Init() {
 	uint8_t regval;
 	I2C_Init();
 
+	// Shutdown mode off
+	if (I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL) != 0) {
+	    return false;
+	}
+/*
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_STATUS, &regval);
 	printf("STATUS = %02x\n", regval);
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_CTRL, &regval);
-	printf("CONTROL = %02x\n", regval);
+	printf("CONTROL = %02x\n", regval);*/
+	return true;
 }
 
 // in degC
 uint32_t LTC2942_GetTemperature() {
 	uint16_t temp;
 	uint8_t regval;
-	I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, 0x7C);
+	// Manual temperature mode
+	I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL | 0x40);
 	vTaskDelay(pdMS_TO_TICKS(20));
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_MSB, &regval);
 	temp = regval << 8;
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_TEMP_LSB, &regval);
 	temp |= regval & 0xff;
 	uint32_t temperature = (uint32_t)temp * 600ul / 65536ul - 273ul;
+	// It would automatically sleep after conversion
 	printf("Temperature: %d degC\n", temperature);
 
 	return temperature;
@@ -55,7 +71,8 @@ uint32_t LTC2942_GetTemperature() {
 uint32_t LTC2942_GetVoltage() {
 	uint16_t volt;
 	uint8_t regval;
-	I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, 0xBC);
+	// Manual voltage mode
+	I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL | 0x80);
 	vTaskDelay(pdMS_TO_TICKS(20));
 	I2C_ReadReg(LTC2942_ADDR, LTC2942_VOLT_MSB, &regval);
 	volt = regval << 8;
@@ -77,4 +94,32 @@ uint32_t LTC2942_GetCharge() {
 	charge |= regval & 0xff;
 	printf("Charge: %04x\n", charge);
 	return (uint32_t)charge & 0xffff;
+}
+
+uint32_t LTC2942_GetLowThreshold() {
+    uint16_t charge;
+    uint8_t regval;
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_CHARGE_LOW_MSB, &regval);
+    charge = regval << 8;
+    I2C_ReadReg(LTC2942_ADDR, LTC2942_CHARGE_LOW_LSB, &regval);
+    charge |= regval & 0xff;
+    return (uint32_t)charge & 0xffff;
+}
+
+void LTC2942_SetCharge(uint32_t charge) {
+    LTC2942_Shutdown();
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CHARGE_MSB, (charge >> 8) & 0xff);
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CHARGE_LSB, charge & 0xff);
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL);
+}
+
+void LTC2942_SetLowThreshold(uint32_t charge) {
+    LTC2942_Shutdown();
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CHARGE_LOW_MSB, (charge >> 8) & 0xff);
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CHARGE_LOW_LSB, charge & 0xff);
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL);
+}
+
+void LTC2942_Shutdown() {
+    I2C_WriteReg(LTC2942_ADDR, LTC2942_CTRL, LTC2942_CTRL_VAL | 0x01);
 }

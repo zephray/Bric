@@ -9,9 +9,13 @@
 #ifndef _LTC2942_H_
 #define _LTC2942_H_
 
-void LTC2942_Init();
+bool LTC2942_Init();
 uint32_t LTC2942_GetTemperature();
 uint32_t LTC2942_GetVoltage();
 uint32_t LTC2942_GetCharge();
+void LTC2942_Shutdown();
+uint32_t LTC2942_GetLowThreshold();
+void LTC2942_SetCharge(uint32_t charge);
+void LTC2942_SetLowThreshold(uint32_t charge);
 
 #endif /* LTC2942_H_ */

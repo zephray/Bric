@@ -47,13 +47,20 @@
 #include "fsl_ostimer.h"
 #include "fsl_ctimer.h"
 #include "sdcard.h"
+#include "hal_input.h"
 #include "ltc2942.h"
+#include "epd.h"
 #include "pm.h"
 #include "app.h"
 /* TODO: insert other include files here. */
 
 /* TODO: insert other definitions and declarations here. */
 
+#define SYSTEM_TASK_HEAPSIZE (128u)
+#define SYSTEM_TASK_PRIORITY (configMAX_PRIORITIES - 1U)
+
+void system_shutdown(void);
+void system_task(void *pvParameters);
 
 /*
  * @brief   Application entry point.
@@ -62,36 +69,61 @@ int main(void) {
   	/* Init board hardware. */
 
 	BOARD_InitBootPins();
-   //SDC_InitSdifUnusedDataPin();
-   BOARD_InitBootClocks();
-   BOARD_InitBootPeripherals();
+    BOARD_InitBootClocks();
+    BOARD_InitBootPeripherals();
 
-   pm_init();
-
-
-    /*if (pdPASS != xTaskCreate(SDC_Test, "SDCTestTask", 1024U, NULL,	(configMAX_PRIORITIES - 2U), NULL))
-	{
-		return -1;
-	}*/
-
-	/*if (pdPASS !=
-		xTaskCreate(SDC_CardDetectTask, "SDC Init", 512U, NULL, (configMAX_PRIORITIES - 1U), NULL))
-	{
-		return -1;
-	}*/
-
-	if (pdPASS !=
-		xTaskCreate(app_task, "App Task", APP_TASK_HEAPSIZE, NULL, APP_TASK_PRIORITY, NULL))
-	{
-		return -1;
-	}
-
+    if (pdPASS != xTaskCreate(system_task, "System Task",
+            SYSTEM_TASK_HEAPSIZE, NULL, SYSTEM_TASK_PRIORITY, NULL)) {
+        // fatal
+    }
 
 	/* Start scheduling. */
 	vTaskStartScheduler();
 
 	// Should not reach here
 	while(1);
+}
+
+void system_task(void *pvParameters) {
+    BaseType_t result;
+    bool pbstat;
+
+    // Initialize system
+    pm_init();
+    hal_input_init();
+
+    // Start application
+    if (pdPASS != xTaskCreate(app_task, "App Task", APP_TASK_HEAPSIZE, NULL,
+            APP_TASK_PRIORITY, NULL)) {
+        // fatal
+    }
+
+    // Ignore all power key activity within 1s of startup
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    for (int i = 0; i < 2; i++) // Queue length = 2
+        xQueueReceive(g_powerButtonEventQueue, &pbstat, pdMS_TO_TICKS(100));
+
+
+    while (1) {
+        result = xQueueReceive(g_powerButtonEventQueue, &pbstat,
+                pdMS_TO_TICKS(50));
+        if (result) {
+            if (pbstat) {
+                // Power button pressed, wait for 3 sec
+                result = xQueueReceive(g_powerButtonEventQueue, &pbstat,
+                        pdMS_TO_TICKS(3000));
+                if (!result) {
+                    // Not received, check again if the power key is pressed
+                    pbstat = pm_is_power_button_pressed();
+                    if (pbstat)
+                        system_shutdown();
+                }
+                // otherwise, something happened, cancel shutdown
+            }
+        }
+        hal_input_scan();
+
+    }
 }
 
 void perf_conf_counter() {
@@ -105,6 +137,12 @@ uint64_t perf_get_counter() {
 
 void vApplicationIdleHook() {
 	asm("WFI");
+}
+
+void system_shutdown() {
+    EPD_Init();
+    EPD_Clear();
+    pm_shutdown();
 }
 
 /* This example demonstrates how a human readable table of run time stats

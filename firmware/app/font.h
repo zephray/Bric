@@ -30,8 +30,10 @@ typedef enum {
 
 void font_init();
 void font_set_font(Font font);
-void font_draw(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode, int *w, int *h);
+void font_draw(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode,
+        int *w, int *h);
 uint32_t font_decode(char *c, CharEncoding encoding, int *size);
-void font_disp(Canvas *canvas, int x, int y, uint32_t color, char *string, int len, CharEncoding encoding);
+void font_disp(Canvas *canvas, int x, int y, int width, uint32_t color,
+        char *string, int len, CharEncoding encoding);
 
 #endif

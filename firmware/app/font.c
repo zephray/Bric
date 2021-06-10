@@ -128,6 +128,9 @@ void font_draw_gb(Canvas *canvas, int x, int y, uint32_t color, uint32_t unicode
     uint16_t gbk = font_ucs_to_gbk(unicode);
 
     if (gbk < 0x80) {
+        *w = 0;
+        if (gbk < 0x20)
+            return;
         // ASCII
         *w = fontWidth;
         *h = fontHeight;
@@ -252,15 +255,20 @@ uint32_t font_decode(char *c, CharEncoding encoding, int *size) {
     return ucf;
 }
 
-void font_disp(Canvas *canvas, int x, int y, uint32_t color, char *string, int len, CharEncoding encoding) {
-    // Dangerous
+void font_disp(Canvas *canvas, int x, int y, int width, uint32_t color,
+        char *string, int len, CharEncoding encoding) {
     int count = 0, char_size = 0;
+    int x0 = x;
     while ((count < len) && (string[count])) {
         uint32_t ucf = font_decode(&(string[count]), encoding, &char_size);
         count += char_size;
         if ((count == char_size) && (ucf == 0xfeff))
         	continue; // Skip BOM
         int w, h;
+        if ((x > (x0 + width)) || (ucf == '\n')) {
+            x = x0;
+            y += h;
+        }
         font_draw(canvas, x, y, color, ucf, &w, &h);
         x += w;
     }
