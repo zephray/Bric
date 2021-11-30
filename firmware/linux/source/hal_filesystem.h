@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <dirent.h>
+#include <unistd.h>
 
 typedef enum {
     OM_READ,   // r

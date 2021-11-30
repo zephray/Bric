@@ -12,13 +12,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "platform.h"
-#include "ltc2942.h"
+#include "hal_power.h"
 #include "hal_input.h"
 #include "ui.h"
 #include "batcal.h"
 
 void batcal_init() {
-    uint32_t low_threshold = LTC2942_GetLowThreshold();
+    uint32_t low_threshold = hal_power_get_empty_level();
     if (low_threshold == 0x00) {
         ui_message("Warning", "Battery hasn't been calibrated.\n"
                 "Remaining battery level unknown.\n"

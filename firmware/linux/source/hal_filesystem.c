@@ -34,7 +34,7 @@ File *hal_fs_open(char *path, OpenMode mode) {
         break;
     default:
         fprintf(stderr, "Unsupported file open mode!\n");
-        return -1;
+        return NULL;
         break;
     }
     return fopen(path, fopenmode);

@@ -25,7 +25,7 @@ static float blerp(float c00, float c10, float c01, float c11, float tx, float t
 
 // Context data structure for JPEG decoding callback
 typedef struct {
-    FIL *fp;           // file pointer of the input file
+    File *fp;           // file pointer of the input file
     uint8_t *fbuf;      // pointer to the output framebuffer
     uint8_t cbuf[32];   // Column buffer for block bilinear scaling
     uint8_t dw_buf[32]; // deferred line buffer writing content

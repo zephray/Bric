@@ -17,8 +17,10 @@
 #include "hal_filesystem.h"
 #include "hal_display.h"
 #include "hal_audio.h"
+#include "hal_power.h"
 #include "minimp3.h"
 #include "decoder.h"
+#include "batcal.h"
 #include "app.h"
 #include "ui.h"
 

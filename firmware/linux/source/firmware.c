@@ -4,15 +4,27 @@
 #include <task.h>
 #include <SDL/SDL.h>
 #include "app.h"
+#include "hal_input.h"
 
 void housekeepingTask(void *arg){
     SDL_Event event;
 
     while(1){
         if (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
+            switch (event.type)
+            {
+            case SDL_QUIT:
                 // vTaskEndScheduler is not implemented, but need to exit
                 kill(getpid(), SIGKILL);
+                break;
+
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                _hal_input_handle_sdl_keyevent(event.key);
+                break;
+            
+            default:
+                break;
             }
         }
         // Yield
@@ -24,8 +36,8 @@ void housekeepingTask(void *arg){
 int main(){
     xTaskCreate(housekeepingTask, "Housekeeping Task", 128,
             NULL, configMAX_PRIORITIES, NULL);
-    xTaskCreate(startup_task, "Startup Task", STARTUP_TASK_HEAPSIZE,
-            NULL, STARTUP_TASK_PRIORITY, NULL);
+    xTaskCreate(app_task, "App Task", APP_TASK_HEAPSIZE,
+            NULL, APP_TASK_PRIORITY, NULL);
     vTaskStartScheduler();
 
     return 0;

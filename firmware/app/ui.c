@@ -69,9 +69,9 @@ static void ui_render_menu(ui_menu_t *menu, int index) {
     int render_start = 0;
     int render_length = 7;
     if ((menu->count - index) >= 4)
-        renderStart = index - 3;
+        render_start = index - 3;
     else
-        renderStart = menu->count - render_length + 1;
+        render_start = menu->count - render_length + 1;
     if (render_start < 0) render_start = 0;
 
     hal_disp_fill(fb_mono, 0, 0, 256, 128, 1);
@@ -91,6 +91,7 @@ static void ui_render_menu(ui_menu_t *menu, int index) {
 int ui_run_menu(ui_menu_t *menu, int index) {
     while (1) {
         ui_render_menu(menu, index);
-        ui_wait_key_release()
+        ui_wait_key_release(0xff);
+        
     }
 }
