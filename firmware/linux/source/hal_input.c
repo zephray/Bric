@@ -9,7 +9,7 @@
 #include <SDL/SDL.h>
 #include "hal_input.h"
 
-uint32_t key_state;
+static  uint32_t key_state;
 
 void hal_input_init(void) {
     key_state = 0;
@@ -23,12 +23,12 @@ void _hal_input_handle_sdl_keyevent(SDL_KeyboardEvent event) {
     uint32_t key_mask;
 
     switch (event.keysym.sym) {
-    case SDLK_LEFT:
+    /*case SDLK_LEFT:
         key_mask = KEY_MASK_LEFT;
         break;
     case SDLK_RIGHT:
         key_mask = KEY_MASK_RIGHT;
-        break;
+        break;*/
     case SDLK_UP:
         key_mask = KEY_MASK_UP;
         break;
@@ -41,12 +41,12 @@ void _hal_input_handle_sdl_keyevent(SDL_KeyboardEvent event) {
     case SDLK_ESCAPE:
         key_mask = KEY_MASK_NO;
         break;
-    case SDLK_z:
+    /*case SDLK_z:
         key_mask = KEY_MASK_SELECT;
         break;
     case SDLK_x:
         key_mask = KEY_MASK_START;
-        break;
+        break;*/
     default:
         // Ignore
         return;

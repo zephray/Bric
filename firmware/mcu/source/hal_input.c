@@ -34,7 +34,7 @@
 #include "pin_mux.h"
 #include "hal_input.h"
 
-uint32_t key_state;
+static uint32_t key_state;
 
 void hal_input_init(void) {
     key_state = 0;

@@ -24,31 +24,28 @@
 #include "app.h"
 #include "ui.h"
 
-void app_task(void *pvParameters) {
-	hal_disp_init();
-	ui_init();
-	ui_clear();
-	// Check battery calibration status
-	batcal_init();
-
-	ui_message("Warning", "Test message 测试信息\nSecond line.");
-
-	/*hal_fs_chdir(APP_ROOT);
-
-	Directory *directory;
-	FileInfo fileInformation;
-	int y = 0;
-
-	printf("\r\nList the file in that directory......\r\n");
-	directory = hal_fs_opendir(".");
-	if (directory == NULL)
-	{
-		printf("Open directory failed.\r\n");
-		vTaskSuspend(NULL);
+bool app_get_fileext(char *fn, char *dst, int max_len) {
+	int len = strlen(fn);
+	int i;
+	for (i = len - 1; i > 0; i--) {
+		if (fn[i] == '.') break;
 	}
-	for (;;)
-	{
+	if (fn[i] != '.')
+		return false; // dot not found
+	i += 1;
+	len = len - i;
+	if (len > max_len) len = max_len;
+	memcpy(dst, fn + i, len);
+	dst[len] = '\0';
+	return true;
+}
+
+int app_readdir(Directory *directory, FileInfo *fileInfo) {
+	FileInfo fileInformation;
+	int count = 0;
+	while (1) {
 		int result = hal_fs_readdir(directory, &fileInformation);
+		char ext[5];
 
 		if ((result < 0) || (fileInformation.fname[0U] == 0U))
 		{
@@ -60,24 +57,23 @@ void app_task(void *pvParameters) {
 		}
 		if (fileInformation.type == FT_DIRECTORY)
 		{
-			printf("Directory file : %s.\r\n", fileInformation.fname);
+			fileInfo[count++] = fileInformation;
 		}
 		else
 		{
-			printf("General file : %s.\r\n", fileInformation.fname);
-			if (fileInformation.fname[0] == 'o')
-				continue;
-			if (fileInformation.fname[0] == 'O')
-				continue;
-			//font_disp(fb, 0, y, 0, fileInformation.fname, 64, CE_UTF8);
-			y += 16;
-			//break; // Play the first file for now
+			if (app_get_fileext(fileInformation.fname, ext, 4)) {
+				if (strcmp(ext, "mp3") == 0) {
+					fileInfo[count++] = fileInformation;
+				}
+			}
 		}
 	}
-	hal_disp_draw(fb, REFRESH_PARTIAL);
+	return count;
+}
 
-	hal_audio_init();
-	hal_audio_set_volume(0xa0);
+void app_playfile(char *fn) {
+	ui_clear();
+	ui_message("播放中", "听听有没有声？");
 
 	DecoderContext *ctx = NULL;
 	ctx = pvPortMalloc(sizeof(DecoderContext));
@@ -85,7 +81,7 @@ void app_task(void *pvParameters) {
 		printf("Unable to allocate memory for decoder context.\r\n");
 		vTaskSuspend(NULL);
 	}
-	dec_openfile(ctx, fileInformation.fname);
+	dec_openfile(ctx, fn);
 
 	//uint32_t charge = LTC2942_GetCharge();
 	//uint32_t tick = perf_get_counter();
@@ -108,25 +104,66 @@ void app_task(void *pvParameters) {
 	//generatePerfReport();
 
 	dec_close(ctx);
+	vPortFree(ctx);
+}
+
+void app_task(void *pvParameters) {
+	hal_disp_init();
+	ui_init();
+	ui_clear();
+
+	hal_fs_init();
+
+	// Check battery calibration status
+	batcal_init();
+
+	hal_audio_init();
+	hal_audio_set_volume(0xa0);
+
+	//ui_message("Warning", "Test message 测试信息\nSecond line.");
+	//hal_fs_chdir(APP_ROOT);
+
+	FileInfo *fileList;
+
+	while (1) {
+		// Basic demo: list all files, let user select, playback
+		// This is like 70KB of memory...
+		// Up to 255 folders + files per folder, big limitation actually
+		fileList = pvPortMalloc(sizeof(FileInfo) * 255);
+
+		Directory *directory;
+		directory = hal_fs_opendir(APP_ROOT);
+		if (directory == NULL)
+		{
+			printf("Open directory failed.\r\n");
+			vTaskSuspend(NULL);
+		}
+
+		int fileCount = app_readdir(directory, fileList);
+		ui_menu_t *fileMenu = pvPortMalloc(sizeof(ui_menu_t) +
+				fileCount * sizeof(ui_menu_item_t));
+		strcpy(fileMenu->title, "当前目录：/");
+		fileMenu->count = fileCount;
+		for (int i = 0; i < fileCount; i++) {
+			strncpy(fileMenu->items[i].title, fileList[i].fname, 60);
+			//if (fileList[i].type == FT_DIRECTORY)
+			//printf("%s\n", fileList[i].fname);
+		}
+
+		int selection = ui_run_menu(fileMenu, 0);
+		FileInfo fileInformation;
+		if (selection >= 0)
+			fileInformation = fileList[selection];
+		vPortFree(fileMenu);
+		vPortFree(fileList);
+
+		if (selection >= 0) {
+			if (fileList[selection].type == FT_REGULAR) {
+				app_playfile(fileInformation.fname);
+			}
+		}
+	}
+
 	hal_audio_stop();
-
-	vPortFree(ctx);*/
-
-	/*uint32_t power = (uint32_t)(((float)charge * 0.085f) / ((float) tick / 10000.0f / 3600.0f) * ((float)voltage / 1000.0f));
-	char *buf = pvPortMalloc(128);
-	sprintf(buf, "Coulomb Counter: %d LSB", charge);
-	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
-	y+=16;
-	sprintf(buf, "Voltage: %d mV", voltage);
-	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
-	y+=16;
-	sprintf(buf, "Time: %d ms", tick / 10);
-	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
-	y+=16;
-	sprintf(buf, "Power: %d mW", power);
-	font_disp(fb, 0, y, 0, buf, 64, CE_UTF8);
-	y+=16;
-	hal_disp_draw(fb, REFRESH_PARTIAL);*/
-
 	vTaskSuspend(NULL);
 }

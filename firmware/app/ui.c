@@ -40,11 +40,11 @@ void ui_init(void) {
 void ui_message(char *title, char *text) {
     hal_disp_fill(fb_mono, 0, 0, 256, 128, 1);
     font_set_font(FNT_12);
-    font_disp(fb_mono, 12, 12, 242, 0, title, 57, CE_UTF8);
+    font_disp(fb_mono, 12, 12, 242, 0, title, 57, CE_UTF8, false);
     hal_disp_fill(fb_mono, 8, 32, 235, 1, 0);
-    font_disp(fb_mono, 12, 40, 242, 0, text, 57 * 5, CE_UTF8);
+    font_disp(fb_mono, 12, 40, 242, 0, text, 57 * 5, CE_UTF8, true);
     ui_rect(200, 98, 242, 114);
-    font_disp(fb_mono, 216, 100, 40, 0, "OK", 3, CE_ASCII);
+    font_disp(fb_mono, 216, 100, 40, 0, "OK", 3, CE_ASCII, false);
     hal_disp_draw(fb_mono, REFRESH_PARTIAL);
 }
 
@@ -73,25 +73,44 @@ static void ui_render_menu(ui_menu_t *menu, int index) {
     else
         render_start = menu->count - render_length + 1;
     if (render_start < 0) render_start = 0;
+    if (menu->count < render_length)
+        render_length = menu->count;
 
     hal_disp_fill(fb_mono, 0, 0, 256, 128, 1);
     font_set_font(FNT_12);
-    font_disp(fb_mono, 12, 2, 242, 0, menu->title, 60, CE_UTF8);
+    font_disp(fb_mono, 12, 2, 242, 0, menu->title, 60, CE_UTF8, false);
     hal_disp_fill(fb_mono, 8, 22, 235, 1, 0);
 
     int inv_offset = index - render_start;
     hal_disp_fill(fb_mono, 4, 30 + inv_offset * 13, 242, 13, 0);
 
     for (int i = render_start; i < (render_start + render_length); i++) {
-        font_disp(fb_mono, 8, 30 + i * 13, 240, (i == index) ? 1 : 0,
-                menu->items[i].title, 60, CE_UTF8);
+        font_disp(fb_mono, 8, 30 + (i - render_start) * 13, 240,
+                (i == index) ? 1 : 0, menu->items[i].title, 60, CE_UTF8, false);
     }
+
+    hal_disp_draw(fb_mono, REFRESH_PARTIAL);
 }
 
 int ui_run_menu(ui_menu_t *menu, int index) {
+    uint32_t key_state;
+    
     while (1) {
         ui_render_menu(menu, index);
         ui_wait_key_release(0xff);
-        
+        ui_wait_key_press(0xff);
+        key_state = hal_input_get_keys();
+        if (key_state & KEY_MASK_UP) {
+            if (index > 0) index--;
+        }
+        if (key_state & KEY_MASK_DOWN) {
+            if (index < menu->count - 1) index++;
+        }
+        if (key_state & KEY_MASK_YES) {
+            return index;
+        }
+        if (key_state & KEY_MASK_NO) {
+            return -1;
+        }
     }
 }

@@ -92,6 +92,8 @@ void system_task(void *pvParameters) {
     pm_init();
     hal_input_init();
 
+    //SDC_Test();
+
     // Start application
     if (pdPASS != xTaskCreate(app_task, "App Task", APP_TASK_HEAPSIZE, NULL,
             APP_TASK_PRIORITY, NULL)) {

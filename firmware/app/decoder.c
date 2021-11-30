@@ -139,6 +139,7 @@ int dec_openfile(DecoderContext *ctx, char *fname) {
     pcm_buffer_sem = xSemaphoreCreateBinary();
 
     // Open file
+    printf("%s\n", fname);
     ctx->file = hal_fs_open(fname, OM_READ);
     if (ctx->file == NULL) {
     	printf("Unable to open audio file.\n");

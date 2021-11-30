@@ -187,7 +187,6 @@ uint32_t hal_disp_get(Canvas *src, int x, int y) {
 void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
     int bpp;
     int pbb;
-    int sft;
     size_t offset;
 
     switch(dst->pixelFormat) {
@@ -196,7 +195,6 @@ void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
     case PIXFMT_Y4:
         bpp = hal_disp_get_bpp(dst->pixelFormat);
         pbb = 8 / bpp;
-        sft = x % pbb;
         if ((x % pbb == 0) && (w % pbb == 0)) {
             // Aligned, do byte operation directly
             uint8_t colorfill = hal_disp_pix_to_y(color, dst->pixelFormat);
@@ -210,7 +208,7 @@ void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
             // Not aligned, fallback to using setpixel
             for (int yy = y; yy < y + h; yy++) {
                 for (int xx = x; xx < x + w; xx++)
-                    hal_disp_set(dst, x, y, color);
+                    hal_disp_set(dst, xx, yy, color);
             }
         }
         break;
@@ -307,6 +305,15 @@ void hal_disp_conv(Canvas *dst, Canvas *src) {
 
 // Commit to screen
 void hal_disp_draw(Canvas *src, RefreshMode refMode) {
+    SDL_Delay(200);
+    if (refMode == REFRESH_FULL) {
+        for (int yy = 0; yy < DISP_HEIGHT; yy++) {
+            for (int xx = 0; xx < DISP_WIDTH; xx++)
+                ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 0xff000000;
+        }
+        SDL_Flip(screen);
+        SDL_Delay(200);
+    }
     for (int yy = 0; yy < DISP_HEIGHT; yy++) {
         for (int xx = 0; xx < DISP_WIDTH; xx++)
             ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 

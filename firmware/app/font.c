@@ -9,6 +9,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include <stdio.h>
+#include <stdbool.h>
 #include "platform.h"
 #include "hal_filesystem.h"
 #include "hal_display.h"
@@ -256,7 +257,7 @@ uint32_t font_decode(char *c, CharEncoding encoding, int *size) {
 }
 
 void font_disp(Canvas *canvas, int x, int y, int width, uint32_t color,
-        char *string, int len, CharEncoding encoding) {
+        char *string, int len, CharEncoding encoding, bool wrap) {
     int count = 0, char_size = 0;
     int x0 = x;
     while ((count < len) && (string[count])) {
@@ -265,7 +266,7 @@ void font_disp(Canvas *canvas, int x, int y, int width, uint32_t color,
         if ((count == char_size) && (ucf == 0xfeff))
         	continue; // Skip BOM
         int w, h;
-        if ((x > (x0 + width)) || (ucf == '\n')) {
+        if (((x > (x0 + width)) && wrap) || (ucf == '\n')) {
             x = x0;
             y += h;
         }

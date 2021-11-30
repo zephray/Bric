@@ -250,7 +250,7 @@ void hal_disp_inv(Canvas *dst, int x, int y, int w, int h) {
             for (int xx = x; xx < x + w; xx++) {
                 offset = (xx * dst->height + y) / pbb;
                 for (int yy = 0; yy < (h / pbb); yy++) {
-                    color = dst[offset];
+                    color = dst->buf[offset];
                     dst->buf[offset++] = ~color;
                 }
             }
@@ -267,7 +267,7 @@ void hal_disp_inv(Canvas *dst, int x, int y, int w, int h) {
         for (int xx = x; xx < x + w; xx++) {
             offset = xx * dst->width + y;
             for (int yy = 0; yy < h; yy++) {
-                color = dst[offset];
+                color = dst->buf[offset];
                 dst->buf[offset++] = 255 - color;
             }
         }

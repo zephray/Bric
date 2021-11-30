@@ -29,7 +29,7 @@ int hal_fs_init() {
 // Open a file, return pointer when success, NULL on error
 File *hal_fs_open(char *path, OpenMode mode) {
     BYTE fatfsmode;
-    File *file = malloc(sizeof(File));
+    File *file = pvPortMalloc(sizeof(File));
     FRESULT result;
     switch (mode)
     {
@@ -56,10 +56,10 @@ File *hal_fs_open(char *path, OpenMode mode) {
     if (xSemaphoreTake(s_fileAccessSemaphore, portMAX_DELAY) != pdTRUE) {
         printf("Unable to obtain lock to access filesystem.\n");
     }
-    result = f_open((FIL *)&file, path, fatfsmode);
+    result = f_open((FIL *)file, path, fatfsmode);
     xSemaphoreGive(s_fileAccessSemaphore);
     if (result != FR_OK) {
-        free(file);
+        vPortFree(file);
         return NULL;
     }
     else {
