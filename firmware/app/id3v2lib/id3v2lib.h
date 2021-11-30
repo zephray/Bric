@@ -14,11 +14,11 @@
 extern "C" {
 #endif
 
-#include "../../../app/id3v2lib/types.h"
-#include "../../../app/id3v2lib/constants.h"
-#include "../../../app/id3v2lib/header.h"
-#include "../../../app/id3v2lib/frame.h"
-#include "../../../app/id3v2lib/utils.h"
+#include "id3v2lib/types.h"
+#include "id3v2lib/constants.h"
+#include "id3v2lib/header.h"
+#include "id3v2lib/frame.h"
+#include "id3v2lib/utils.h"
 
 ID3v2_tag* load_tag(const char* file_name);
 ID3v2_tag* load_tag_with_file(File *file);

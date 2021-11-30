@@ -10,13 +10,13 @@
 #ifndef id3v2lib_header_h
 #define id3v2lib_header_h
 
-#include "../../../app/id3v2lib/constants.h"
-#include "../../../app/id3v2lib/types.h"
-#include "../../../app/id3v2lib/utils.h"
+#include "id3v2lib/constants.h"
+#include "id3v2lib/types.h"
+#include "id3v2lib/utils.h"
 
 int has_id3v2tag(ID3v2_header* tag_header);
 int _has_id3v2tag(char* raw_header);
-ID3v2_header* get_tag_header_with_file(FIL *file);
+ID3v2_header* get_tag_header_with_file(File *file);
 ID3v2_header* get_tag_header_with_buffer(char* buffer, int length);
 int get_tag_version(ID3v2_header* tag_header);
 void edit_tag_size(ID3v2_tag* tag);

@@ -10,7 +10,7 @@
 #ifndef id3v2lib_types_h
 #define id3v2lib_types_h
 
-#include "../../../app/id3v2lib/constants.h"
+#include "id3v2lib/constants.h"
 
 
 typedef struct

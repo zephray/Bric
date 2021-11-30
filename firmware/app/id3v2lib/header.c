@@ -35,12 +35,12 @@ int _has_id3v2tag(char* raw_header)
     return 0;
 }
 
-ID3v2_header* get_tag_header_with_file(FIL *file)
+ID3v2_header* get_tag_header_with_file(File *file)
 {
     char buffer[ID3_HEADER];
     uint32_t bytes;
-    f_lseek(file, 0);
-    f_read(file, buffer, ID3_HEADER, &bytes);
+    hal_fs_seek(file, 0);
+    bytes = hal_fs_read(file, buffer, ID3_HEADER);
     if (bytes != ID3_HEADER)
     	return NULL;
     return get_tag_header_with_buffer(buffer, ID3_HEADER);
