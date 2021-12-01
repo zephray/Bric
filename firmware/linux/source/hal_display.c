@@ -11,6 +11,7 @@
 #include "hal_display.h"
 
 static SDL_Surface *screen;
+static Canvas *back_buffer;
 
 // Power control
 void hal_disp_init() {
@@ -21,6 +22,7 @@ void hal_disp_init() {
     if (screen == NULL) {
         exit(1);
     }
+    back_buffer = hal_disp_create(DISP_WIDTH, DISP_HEIGHT, PIXFMT_Y8);
 }
 
 void hal_disp_deinit() {
@@ -313,11 +315,25 @@ void hal_disp_draw(Canvas *src, RefreshMode refMode) {
         }
         SDL_Flip(screen);
         SDL_Delay(200);
+        for (int yy = 0; yy < DISP_HEIGHT; yy++) {
+            for (int xx = 0; xx < DISP_WIDTH; xx++) {
+                ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 
+                        hal_disp_conv_pix(PIXFMT_ARGB8888, src->pixelFormat, hal_disp_get(src, xx, yy));
+            }  
+        }
     }
-    for (int yy = 0; yy < DISP_HEIGHT; yy++) {
-        for (int xx = 0; xx < DISP_WIDTH; xx++)
-            ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 
-                    hal_disp_conv_pix(PIXFMT_ARGB8888, src->pixelFormat, hal_disp_get(src, xx, yy));
+    else {
+        for (int yy = 0; yy < DISP_HEIGHT; yy++) {
+            for (int xx = 0; xx < DISP_WIDTH; xx++) {
+                uint8_t fy = hal_disp_get(src, xx, yy);
+                uint8_t by = hal_disp_get(back_buffer, xx, yy);
+                if (fy != by)
+                    ((uint32_t *)screen->pixels)[yy * DISP_WIDTH + xx] = 
+                            hal_disp_conv_pix(PIXFMT_ARGB8888, src->pixelFormat, fy);
+                hal_disp_set(back_buffer, xx, yy, fy);
+            }  
+        }
     }
+
     SDL_Flip(screen);
 }

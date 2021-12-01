@@ -49,7 +49,7 @@ ID3v2_frame* parse_frame(File *file, int skip, int offset, int version)
     	goto error;
 
     // Load frame data
-    frame->offset = f_tell(file);
+    frame->offset = hal_fs_tell(file);
     
     return frame;
 
@@ -182,7 +182,7 @@ ID3v2_frame_apic_content* parse_apic_frame_content(File *file, ID3v2_frame* fram
     	goto error;
 
     //content->description = &frame->data[++i];
-    int seek = f_tell(file);
+    int seek = hal_fs_tell(file);
     i = 0;
     if (content->encoding == 0x01 || content->encoding == 0x02) {
             /* skip UTF-16 description */
@@ -210,9 +210,9 @@ ID3v2_frame_apic_content* parse_apic_frame_content(File *file, ID3v2_frame* fram
     if (bytes != i)
     	goto error;
 
-    seek = f_tell(file);
+    seek = hal_fs_tell(file);
     content->picture_size = frame->size - (seek - frame->offset);
-    content->offset = f_tell(file);
+    content->offset = hal_fs_tell(file);
 
     return content;
 error:

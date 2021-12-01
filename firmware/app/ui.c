@@ -16,6 +16,7 @@
 #include "hal_display.h"
 #include "hal_input.h"
 #include "font.h"
+#include "tags.h"
 #include "ui.h"
 
 // Size for 8bpp FB: 29.8KB, size for 1bpp FB: 3.7KB
@@ -50,6 +51,7 @@ void ui_message(char *title, char *text) {
 
 void ui_clear(void) {
     hal_disp_fill(fb_mono, 0, 0, 256, 128, 0);
+    hal_disp_fill(fb_grey, 0, 0, 250, 122, 0xff);
     hal_disp_draw(fb_mono, REFRESH_PARTIAL);
 }
 
@@ -113,4 +115,43 @@ int ui_run_menu(ui_menu_t *menu, int index) {
             return -1;
         }
     }
+}
+
+void ui_song_info(char *fn) {
+    tags_open(fn);
+
+    hal_disp_fill(fb_mono, 0, 0, 256, 128, 1);
+    hal_disp_draw(fb_mono, REFRESH_PARTIAL);
+
+    tags_display_cover(fb_grey->buf, fb_grey->width, 122, 122);
+    hal_disp_draw(fb_grey, REFRESH_FULL);
+
+    char *title = tags_get_title();
+    char *artist = tags_get_artist();
+    char *album = tags_get_album();
+
+    CharEncoding ce;
+    if ((title[0] == 1) || (title[0] == 2))
+        ce = CE_UTF16;
+    else if (title[0] == 3)
+        ce = CE_UTF8;
+    else
+        ce = CE_GB2312;
+
+    //font_set_font(FNT_12);
+    //font_disp(fb_mono, 134, 2, 242, 0, "播放中", 60, CE_UTF8, false);
+    //hal_disp_fill(fb_mono, 130, 22, 110, 1, 0);
+
+    font_set_font(FNT_16);
+    font_disp(fb_mono, 134, 30, 242, 0, title + 1, 60, ce, false);
+    font_set_font(FNT_12);
+    font_disp(fb_mono, 134, 50, 242, 0, artist + 1, 60, ce, false);
+    font_disp(fb_mono, 134, 62, 242, 0, album + 1, 60, ce, false);
+    hal_disp_draw(fb_mono, REFRESH_PARTIAL);
+
+    vPortFree(title);
+    vPortFree(artist);
+    vPortFree(album);
+    
+    tags_close();
 }

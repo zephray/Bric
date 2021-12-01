@@ -334,7 +334,7 @@ static void EPD_SendBitPlane(uint8_t* src, int bp) {
 				combined <<= 1;
 				combined |= (src[(y*8+j)*250+x] >> bp) & 0x01;
 			}
-			EPD_WriteDat(combined);
+			EPD_WriteDat(~combined);
 		}
 	}
 }
@@ -375,6 +375,8 @@ void EPD_DispGreyscale(uint8_t* src) {
 	EPD_WriteDat(0x04);
 	EPD_WriteCmd(0x20);
 	EPD_Wait();
+
+	EPD_SwitchToPartial();
 }
 
 void EPD_DeepSleep() {

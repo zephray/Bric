@@ -26,5 +26,6 @@ void ui_clear(void);
 void ui_wait_key_press(uint32_t keymask);
 void ui_wait_key_release(uint32_t keymask);
 int ui_run_menu(ui_menu_t *menu, int index);
+void ui_song_info(char *fn);
 
 #endif /* UI_H_ */

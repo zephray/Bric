@@ -130,7 +130,7 @@ static void output_bilinear(IODEV *dev, void* bitmap, JRECT *rect) {
             c11 = getpixel(dev, bitmap, rect, gxr+1, gyr+1);
             uint8_t result = (uint8_t)blerp(c00, c10, c01, c11, gx - gxi, gy - gyi);
 
-            result = 255 - result;
+            //result = 255 - result;
             setpixel(dev->fbuf, dev->stride, x, y, result);
         }
     }

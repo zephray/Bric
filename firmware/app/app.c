@@ -18,11 +18,13 @@
 #include "hal_display.h"
 #include "hal_audio.h"
 #include "hal_power.h"
+#include "font.h"
 #include "minimp3.h"
 #include "decoder.h"
 #include "batcal.h"
 #include "app.h"
 #include "ui.h"
+#include "id3v2lib/id3v2lib.h"
 
 bool app_get_fileext(char *fn, char *dst, int max_len) {
 	int len = strlen(fn);
@@ -71,9 +73,18 @@ int app_readdir(Directory *directory, FileInfo *fileInfo) {
 	return count;
 }
 
+void *app_loadfromfile(File *file, uint32_t offset, uint32_t size) {
+	void *buf = pvPortMalloc(size);
+	if (!buf)
+		return NULL;
+	hal_fs_seek(file, offset);
+	hal_fs_read(file, buf, size);
+	return buf;
+}
+
 void app_playfile(char *fn) {
 	ui_clear();
-	ui_message("播放中", "听听有没有声？");
+	ui_song_info(fn);
 
 	DecoderContext *ctx = NULL;
 	ctx = pvPortMalloc(sizeof(DecoderContext));
@@ -121,7 +132,7 @@ void app_task(void *pvParameters) {
 	hal_audio_set_volume(0xa0);
 
 	//ui_message("Warning", "Test message 测试信息\nSecond line.");
-	//hal_fs_chdir(APP_ROOT);
+	hal_fs_chdir(APP_ROOT);
 
 	FileInfo *fileList;
 
@@ -132,7 +143,7 @@ void app_task(void *pvParameters) {
 		fileList = pvPortMalloc(sizeof(FileInfo) * 255);
 
 		Directory *directory;
-		directory = hal_fs_opendir(APP_ROOT);
+		directory = hal_fs_opendir(".");
 		if (directory == NULL)
 		{
 			printf("Open directory failed.\r\n");
@@ -156,6 +167,8 @@ void app_task(void *pvParameters) {
 			fileInformation = fileList[selection];
 		vPortFree(fileMenu);
 		vPortFree(fileList);
+
+		hal_fs_closedir(directory);
 
 		if (selection >= 0) {
 			if (fileList[selection].type == FT_REGULAR) {

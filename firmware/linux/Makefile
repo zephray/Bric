@@ -4,7 +4,7 @@
 TARGET := firmware
 ODIR ?= build
 OBJODIR := $(ODIR)/obj
-SRCDIR := ../app
+SRCDIRS := ../app ../app/id3v2lib
 PORTDIR := source
 
 # A simple variant is to prefix commands with $(Q) - that's useful
@@ -102,7 +102,7 @@ INCLUDES += -I ./ -I ./source/ -I ../app/
 #******************************************************************************
 # C File
 CSRCS += \
-		$(wildcard $(SRCDIR)/*.c) \
+		$(foreach srcdir,$(SRCDIRS),$(wildcard $(srcdir)/*.c)) \
 		$(wildcard $(PORTDIR)/*.c)
 
 #******************************************************************************

@@ -219,7 +219,7 @@ void hal_disp_fill(Canvas *dst, int x, int y, int w, int h, uint32_t color) {
         break;
     case PIXFMT_Y8:
         for (int xx = x; xx < x + w; xx++) {
-            offset = xx * dst->width + y;
+            offset = xx * dst->height + y;
             for (int yy = 0; yy < h; yy++)
                 dst->buf[offset++] = (uint8_t)color;
         }

@@ -21,10 +21,6 @@ ID3v2_tag* load_tag(const char* file_name)
     File *file = NULL;
     ID3v2_tag *tag;
 
-    file = (File *)pvPortMalloc(sizeof(File));
-    if (!file)
-    	return NULL;
-
     // allocate buffer and fetch header
     if((file = hal_fs_open((char *)file_name, OM_READ)) == NULL)
     {
