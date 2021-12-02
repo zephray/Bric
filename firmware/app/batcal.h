@@ -10,5 +10,6 @@
 #define BATCAL_H_
 
 void batcal_init();
+void batcal_run();
 
 #endif /* BATCAL_H_ */

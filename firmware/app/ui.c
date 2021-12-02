@@ -38,14 +38,14 @@ void ui_init(void) {
     font_set_font(FNT_12);
 }
 
-void ui_message(char *title, char *text) {
+void ui_message(char *title, char *text, char *button) {
     hal_disp_fill(fb_mono, 0, 0, 256, 128, 1);
     font_set_font(FNT_12);
     font_disp(fb_mono, 12, 12, 242, 0, title, 57, CE_UTF8, false);
     hal_disp_fill(fb_mono, 8, 32, 235, 1, 0);
     font_disp(fb_mono, 12, 40, 242, 0, text, 57 * 5, CE_UTF8, true);
     ui_rect(200, 98, 242, 114);
-    font_disp(fb_mono, 216, 100, 40, 0, "OK", 3, CE_ASCII, false);
+    font_disp(fb_mono, 216, 100, 40, 0, button, 3, CE_ASCII, false);
     hal_disp_draw(fb_mono, REFRESH_PARTIAL);
 }
 

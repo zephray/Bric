@@ -50,7 +50,7 @@
 #include "hal_input.h"
 #include "ltc2942.h"
 #include "epd.h"
-#include "pm.h"
+#include "hal_power.h"
 #include "app.h"
 /* TODO: insert other include files here. */
 
@@ -89,7 +89,7 @@ void system_task(void *pvParameters) {
     bool pbstat;
 
     // Initialize system
-    pm_init();
+    hal_power_init();
     hal_input_init();
 
     //SDC_Test();
@@ -116,7 +116,7 @@ void system_task(void *pvParameters) {
                         pdMS_TO_TICKS(3000));
                 if (!result) {
                     // Not received, check again if the power key is pressed
-                    pbstat = pm_is_power_button_pressed();
+                    pbstat = hal_power_is_power_button_pressed();
                     if (pbstat)
                         system_shutdown();
                 }
@@ -144,7 +144,7 @@ void vApplicationIdleHook() {
 void system_shutdown() {
     EPD_Init();
     EPD_Clear();
-    pm_shutdown();
+    hal_power_shutdown();
 }
 
 /* This example demonstrates how a human readable table of run time stats

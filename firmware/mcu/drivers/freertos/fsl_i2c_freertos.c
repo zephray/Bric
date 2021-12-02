@@ -13,6 +13,8 @@
 #define FSL_COMPONENT_ID "platform.drivers.flexcomm_i2c_freertos"
 #endif
 
+#define I2C_MAX_DELAY pdMS_TO_TICKS(1000)
+
 static void I2C_RTOS_Callback(I2C_Type *base, i2c_master_handle_t *drv_handle, status_t status, void *userData)
 {
     i2c_rtos_handle_t *handle = (i2c_rtos_handle_t *)userData;
@@ -102,7 +104,7 @@ status_t I2C_RTOS_Transfer(i2c_rtos_handle_t *handle, i2c_master_transfer_t *tra
     status_t status;
 
     /* Lock resource mutex */
-    if (xSemaphoreTake(handle->mutex, portMAX_DELAY) != pdTRUE)
+    if (xSemaphoreTake(handle->mutex, I2C_MAX_DELAY) != pdTRUE)
     {
         return kStatus_I2C_Busy;
     }
@@ -115,7 +117,10 @@ status_t I2C_RTOS_Transfer(i2c_rtos_handle_t *handle, i2c_master_transfer_t *tra
     }
 
     /* Wait for transfer to finish */
-    (void)xSemaphoreTake(handle->semaphore, portMAX_DELAY);
+    if (xSemaphoreTake(handle->semaphore, I2C_MAX_DELAY) != pdTRUE)
+    {
+    	printf("I2C operation timed out\n");
+    }
 
     /* Unlock resource mutex */
     xSemaphoreGive(handle->mutex);

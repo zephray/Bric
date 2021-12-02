@@ -15,7 +15,9 @@ uint32_t LTC2942_GetVoltage();
 uint32_t LTC2942_GetCharge();
 void LTC2942_Shutdown();
 uint32_t LTC2942_GetLowThreshold();
+uint32_t LTC2942_GetHighThreshold();
 void LTC2942_SetCharge(uint32_t charge);
 void LTC2942_SetLowThreshold(uint32_t charge);
+void LTC2942_SetHighThreshold(uint32_t charge);
 
 #endif /* LTC2942_H_ */

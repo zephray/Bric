@@ -21,7 +21,7 @@ typedef struct {
 } ui_menu_t;
 
 void ui_init(void);
-void ui_message(char *title, char *text);
+void ui_message(char *title, char *text, char *button);
 void ui_clear(void);
 void ui_wait_key_press(uint32_t keymask);
 void ui_wait_key_release(uint32_t keymask);

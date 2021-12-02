@@ -134,6 +134,8 @@ void app_task(void *pvParameters) {
 	//ui_message("Warning", "Test message 测试信息\nSecond line.");
 	hal_fs_chdir(APP_ROOT);
 
+	batcal_run();
+
 	FileInfo *fileList;
 
 	while (1) {
