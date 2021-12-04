@@ -64,7 +64,7 @@ int app_readdir(Directory *directory, FileInfo *fileInfo) {
 		else
 		{
 			if (app_get_fileext(fileInformation.fname, ext, 4)) {
-				if (strcmp(ext, "mp3") == 0) {
+				if ((strcmp(ext, "mp3") == 0) || (strcmp(ext, "wav") == 0)) {
 					fileInfo[count++] = fileInformation;
 				}
 			}
@@ -83,8 +83,26 @@ void *app_loadfromfile(File *file, uint32_t offset, uint32_t size) {
 }
 
 void app_playfile(char *fn) {
+	char ext[5];
+
+	FileFormat fmt = FMT_UNKNOWN;
+	if (app_get_fileext(fn, ext, 4)) {
+		if (strcmp(ext, "mp3") == 0) {
+			fmt = FMT_MP3;
+		}
+		else if (strcmp(ext, "wav") == 0) {
+			fmt = FMT_WAV;
+		}
+		else {
+			printf("Unknown extension %s\n", ext);
+			return;
+		}
+	}
+
 	ui_clear();
-	ui_song_info(fn);
+	if (fmt == FMT_MP3)
+		ui_song_info(fn);
+	// the tags layer should support all formats, but that's for the future (probably never...)
 
 	DecoderContext *ctx = NULL;
 	ctx = pvPortMalloc(sizeof(DecoderContext));
@@ -92,17 +110,20 @@ void app_playfile(char *fn) {
 		printf("Unable to allocate memory for decoder context.\r\n");
 		vTaskSuspend(NULL);
 	}
-	dec_openfile(ctx, fn);
+
+	dec_openfile(ctx, fn, fmt);
 
 	//uint32_t charge = LTC2942_GetCharge();
 	//uint32_t tick = perf_get_counter();
 
 	// Playback
-	if (hal_audio_start(44100, AF_S16LE, dec_audio_callback, ctx) < 0) {
+	if (hal_audio_start(ctx->sample_rate, ctx->output_format, dec_audio_callback, ctx) < 0) {
 		printf("Unable to start audio subsystem.\r\n");
 		vTaskSuspend(NULL);
 	}
 	dec_play(ctx);
+
+	printf("Playing\n");
 
 	while (!ctx->finished) {
 		vTaskDelay(pdMS_TO_TICKS(10));

@@ -15,15 +15,34 @@ static int volume;
 #define HAL_AUDIO_BUFFER_SIZE (8192)
 uint8_t audio_buffer[HAL_AUDIO_BUFFER_SIZE];
 size_t buffer_level;
+AudioFormat audio_format;
 
 int hal_audio_init() {
     // SDL should be initialized in SDL_Init called in video init
 }
 
+size_t hal_audio_callback_wrapper(void *userdata, uint8_t *stream, uint32_t len) {
+    if (audio_format == AF_S32LE) {
+        uint32_t *temp = malloc(len * 2);
+        size_t size = user_cb(userdata, temp, len * 2);
+        uint16_t *outbuf = (uint16_t *)stream;
+        for (size_t i = 0; i < size / 4; i++) {
+            uint32_t s32 = temp[i];
+            uint16_t s16 = s32 >> 16;
+            outbuf[i] = s16;
+        }
+        free(temp);
+        return size / 2;
+    }
+    else {
+        return user_cb(userdata, stream, len);
+    }
+}
+
 void hal_audio_sdl_callback(void *userdata, uint8_t *stream, int len) {
-    uint8_t *temp = malloc(len);
     while (buffer_level < len) {
-        buffer_level += user_cb(userdata, &(audio_buffer[buffer_level]),
+        buffer_level += hal_audio_callback_wrapper(userdata,
+                &(audio_buffer[buffer_level]),
                 HAL_AUDIO_BUFFER_SIZE - buffer_level);
     }
     SDL_MixAudio(stream, audio_buffer, len, volume);
@@ -35,10 +54,7 @@ int hal_audio_start(int samplerate, AudioFormat format, AudioCallback cb, void *
     SDL_AudioSpec as_request;
     SDL_AudioSpec as_got;
 
-    if (format != AF_S16LE) {
-        fprintf(stderr, "Format other than S16 is not yet supported in linux framework\n");
-        return -1;
-    }
+    audio_format = format;
 
     as_request.freq = samplerate;
     as_request.format = AUDIO_S16;

@@ -1,19 +1,16 @@
-//
-// Project Bric
-// Copyright 2020 Wenting Zhang
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-//
+#include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include "hal_filesystem.h"
 #include "waveheader.h"
 
-// Generate a wav file header with the given parameter
-void waveheader(uint8_t *header, uint32_t sampleRate, uint32_t bitsPerFrame, uint32_t fileSize) {
-    uint32_t totalDataLen = fileSize - 8U;
-    uint32_t audioDataLen = fileSize - 44U;
-    uint32_t byteRate = sampleRate * (bitsPerFrame / 8U) * 2U;
+void wavhdrWrite(uint8_t *header, uint32_t sampleRate, 
+        uint32_t bitsPerSample, uint32_t samples, uint32_t channels) {
+    uint32_t audioDataLen = samples * (bitsPerSample / 8u) * channels;
+    uint32_t fileSize = audioDataLen + 44u;
+    uint32_t totalDataLen = fileSize - 8u;
+    uint32_t byteRate = sampleRate * (bitsPerSample / 8u) * channels;
     header[0] = 'R';
     header[1] = 'I';
     header[2] = 'F';
@@ -36,7 +33,7 @@ void waveheader(uint8_t *header, uint32_t sampleRate, uint32_t bitsPerFrame, uin
     header[19] = 0;
     header[20] = 1; /* format = 1 ,Wave type PCM */
     header[21] = 0;
-    header[22] = 2; /* channels */
+    header[22] = channels;
     header[23] = 0;
     header[24] = (sampleRate & 0xff);
     header[25] = ((sampleRate >> 8U) & 0xff);
@@ -46,9 +43,9 @@ void waveheader(uint8_t *header, uint32_t sampleRate, uint32_t bitsPerFrame, uin
     header[29] = ((byteRate >> 8U) & 0xff);
     header[30] = ((byteRate >> 16U) & 0xff);
     header[31] = ((byteRate >> 24U) & 0xff);
-    header[32] = (2 * bitsPerFrame / 8); /* block align */
+    header[32] = (2 * bitsPerSample / 8); /* block align */
     header[33] = 0;
-    header[34] = 16; /* bits per sample */
+    header[34] = bitsPerSample; /* bits per sample */
     header[35] = 0;
     header[36] = 'd'; /*"data" marker */
     header[37] = 'a';
@@ -58,4 +55,61 @@ void waveheader(uint8_t *header, uint32_t sampleRate, uint32_t bitsPerFrame, uin
     header[41] = ((audioDataLen >> 8) & 0xff);
     header[42] = ((audioDataLen >> 16) & 0xff);
     header[43] = ((audioDataLen >> 24) & 0xff);
+}
+
+uint32_t readUint32(uint8_t *ptr) {
+    uint32_t val = ptr[3];
+    val <<= 8;
+    val |= ptr[2];
+    val <<= 8;
+    val |= ptr[1];
+    val <<= 8;
+    val |= ptr[0];
+    return val;
+}
+
+bool wavhdrRead(File *fp, uint32_t *sampleRate,
+        uint32_t *bitsPerSample, uint32_t *dataLen, uint32_t *channels) {
+
+    // Read RIFF chunk descriptor
+    uint8_t header[40];
+    if (hal_fs_read(fp, header, 12) != 12)
+        return false;
+
+    if (strncmp(header, "RIFF", 4)) return false;
+    if (strncmp(header + 8, "WAVE", 4)) return false;
+
+    // Read fmt sub chunk
+    if (hal_fs_read(fp, header, 24) != 24)
+        return false;
+
+    int subChunkSize = readUint32(header + 4);
+    if (strncmp(header, "fmt ", 4)) return false;
+
+    *bitsPerSample = (uint32_t)header[22];
+    *channels = (uint32_t)header[10];
+    *sampleRate = readUint32(header + 12);
+    if (subChunkSize > 16) {
+        hal_fs_seek(fp, hal_fs_tell(fp) + subChunkSize - 16);
+    }
+
+    uint32_t audioDataLen = 0;
+    // There could be other blocks before the data block
+    // Find data sub chunk
+    while (hal_fs_read(fp, header, 8) == 8) {
+        subChunkSize = readUint32(header + 4);
+        if (strncmp(header, "data", 4) == 0) {
+            // found
+            audioDataLen = subChunkSize;
+            break;
+        }
+        else {
+            // not found
+            hal_fs_seek(fp, hal_fs_tell(fp) + subChunkSize);
+        }
+    }
+
+    *dataLen = audioDataLen;
+
+    return true;
 }

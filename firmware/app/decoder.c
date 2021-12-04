@@ -14,8 +14,10 @@
 #include "semphr.h"
 #include "queue.h"
 #include "hal_filesystem.h"
+#include "hal_audio.h"
 #define MINIMP3_IMPLEMENTATION
 #include "minimp3.h"
+#include "waveheader.h"
 #include "decoder.h"
 
 static int16_t pcm_buffer[MAX_FRAME_SIZE];
@@ -35,7 +37,7 @@ void dec_fetch_thread(void *arg) {
 	}
 
     while (ctx->offset < ctx->file_size) {
-        uint32_t bytes;
+        int bytes;
         bytes = hal_fs_read(ctx->file, buf, QUEUE_OBJECT); // Could be -1
         if (bytes < 0)
             break;
@@ -47,6 +49,50 @@ void dec_fetch_thread(void *arg) {
 
 	vPortFree(buf);
 	vTaskSuspend(NULL);
+}
+
+// Max number of samples to be submitted once
+#define MAX_WAV_SIZE 1152
+
+int dec_decode_wav(DecoderContext *ctx, const uint8_t *buf, int buf_level,
+        void *pcm, mp3dec_frame_info_t *info) {
+    uint32_t num_samples;
+
+    if (ctx->bits_per_sample == 16) {
+        uint16_t *outbuf = (uint16_t *)pcm;
+        num_samples = buf_level / 2 / ctx->channels;
+        if (num_samples > MAX_WAV_SIZE) num_samples = MAX_WAV_SIZE;
+        for (uint32_t i = 0; i < num_samples * ctx->channels; i++) {
+            *outbuf++ = *(uint16_t *)buf;
+            buf += 2;
+        }
+        info->frame_bytes = num_samples * 2 * ctx->channels;
+    }
+    else if (ctx->bits_per_sample == 24) {
+        uint32_t *outbuf = (uint32_t *)pcm;
+        num_samples = buf_level / 3 / ctx->channels;
+        if (num_samples > MAX_WAV_SIZE) num_samples = MAX_WAV_SIZE;
+        for (uint32_t i = 0; i < num_samples * ctx->channels; i++) {
+            uint32_t sample;
+            sample = (buf[i] << 8 | buf[i + 1] << 16 | buf[i + 2] << 24);
+            buf += 3;
+            *outbuf++ = sample;
+        }
+        info->frame_bytes = num_samples * 3 * ctx->channels;
+    }
+    else if (ctx->bits_per_sample == 32) {
+        uint32_t *outbuf = (uint32_t *)pcm;
+        num_samples = buf_level / 4 / ctx->channels;
+        if (num_samples > MAX_WAV_SIZE) num_samples = MAX_WAV_SIZE;
+        for (uint32_t i = 0; i < num_samples * ctx->channels; i++) {
+            *outbuf++ = *(uint32_t *)buf;
+            buf += 4;
+        }
+        info->frame_bytes = num_samples * 4 * ctx->channels;
+    }
+    info->channels = ctx->channels;
+
+    return num_samples;
 }
 
 void dec_decode_thread(void *arg) {
@@ -74,13 +120,18 @@ void dec_decode_thread(void *arg) {
         	xSemaphoreTake(pcm_buffer_sem, portMAX_DELAY);
         // Decode audio
         // This things need ~16KB stack space
-        samples = mp3dec_decode_frame(&(ctx->mp3d), buf, buf_level, pcm_buffer, &info);
+        if (ctx->fmt == FMT_MP3) {
+            samples = mp3dec_decode_frame(&(ctx->mp3d), buf, buf_level, pcm_buffer, &info);
+        }
+        else {
+            samples = dec_decode_wav(ctx, buf, buf_level, pcm_buffer, &info);
+        }
         buf_level -= info.frame_bytes;
         ctx->processed += info.frame_bytes;
         memmove(buf, buf + info.frame_bytes, buf_level);
         // If any samples has been decoded, mark the buffer as used
         if (samples != 0) {
-            pcm_buffer_size = samples * 2 * info.channels;
+            pcm_buffer_size = samples * ctx->bits_per_sample / 8 * info.channels;
             pcm_buffer_ready = 1;
         }
         else if (info.frame_bytes == 0) {
@@ -131,7 +182,7 @@ size_t dec_audio_callback(void *userdata, uint8_t *stream, uint32_t len) {
     return buf_size;
 }
 
-int dec_openfile(DecoderContext *ctx, char *fname) {
+int dec_openfile(DecoderContext *ctx, char *fname, FileFormat fmt) {
     if ((!ctx) || (!fname))
         return -1;
     memset(ctx, 0, sizeof(DecoderContext));
@@ -157,7 +208,27 @@ int dec_openfile(DecoderContext *ctx, char *fname) {
     ctx->finished = false;
 
     // Setup decoder
-    mp3dec_init(&(ctx->mp3d));
+    ctx->fmt = fmt;
+    if (fmt == FMT_MP3) {
+        mp3dec_init(&(ctx->mp3d));
+        ctx->output_format = AF_S16LE;
+        ctx->bits_per_sample = 16;
+        ctx->sample_rate = 44100; // TODO: Read from file
+    }
+    else if (fmt == FMT_WAV) {
+        uint32_t dataLen;
+        if (!wavhdrRead(ctx->file, &(ctx->sample_rate), &(ctx->bits_per_sample),
+                &dataLen, &(ctx->channels))) {
+            printf("Failed to load wave header!\n");
+            return -1;
+        }
+        ctx->samples = dataLen / ctx->channels / (ctx->bits_per_sample / 8);
+        if (ctx->bits_per_sample == 16)
+            ctx->output_format = AF_S16LE;
+        else
+            ctx->output_format = AF_S32LE;
+        printf("Sample rate: %d\nBits per sample: %d\nSamples: %d\nChannels: %d\n", ctx->sample_rate, ctx->bits_per_sample, ctx->samples, ctx->channels);
+    }
 
     // Start threads
     xTaskCreate(dec_fetch_thread, "fetcher", 512, (void *)ctx, 4,

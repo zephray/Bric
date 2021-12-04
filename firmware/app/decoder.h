@@ -25,20 +25,30 @@
 
 #define MAX_FRAME_SIZE (1152*2*2)
 
+typedef enum {
+    FMT_UNKNOWN,
+    FMT_MP3,
+    FMT_WAV
+} FileFormat;
+
 typedef struct {
+    FileFormat fmt;
     // Decoder handle
     mp3dec_t mp3d;
     // Input file
     File * file;
     size_t file_size;
+    uint32_t sample_rate;
+    AudioFormat output_format;
+    uint32_t bits_per_sample;
     // For communication between fetch and decode
     QueueHandle_t input_queue; // allocated dynamically
     // Input file counting
     size_t offset; // Current input file offset
     size_t processed; // Current processed byte count
     // File information
-    int samples;
-    int channels;
+    uint32_t samples;
+    uint32_t channels;
     // Playing status
     volatile bool playing;
     volatile bool finished;
@@ -47,7 +57,7 @@ typedef struct {
     TaskHandle_t decode_handle;
 } DecoderContext;
 
-int dec_openfile(DecoderContext *ctx, char *fname);
+int dec_openfile(DecoderContext *ctx, char *fname, FileFormat fmt);
 void dec_decode(DecoderContext *ctx, uint8_t *buf, int bytes);
 size_t dec_audio_callback(void *userdata, uint8_t *stream, uint32_t len);
 int dec_play(DecoderContext *ctx);
