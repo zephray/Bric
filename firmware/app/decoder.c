@@ -52,7 +52,7 @@ void dec_fetch_thread(void *arg) {
 }
 
 // Max number of samples to be submitted once
-#define MAX_WAV_SIZE 1152
+#define MAX_WAV_SIZE 512
 
 int dec_decode_wav(DecoderContext *ctx, const uint8_t *buf, int buf_level,
         void *pcm, mp3dec_frame_info_t *info) {
